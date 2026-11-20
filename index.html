@@ -49,6 +49,15 @@
       </div>
     </section>
 
+    <section class="view view-bilan" data-view="bilan" aria-label="Bilan" hidden>
+      <header class="view-head">
+        <h1>Bilan 1</h1>
+        <p>Une prise à la fois : l'appli la nomme et la garde. À la fin, un seul partage envoie tout.</p>
+      </header>
+      <ol class="bilan-nav" id="bilanNav" aria-label="Étapes du bilan"></ol>
+      <article class="step" id="bilanStep"></article>
+    </section>
+
     <section class="view view-prises" data-view="prises" aria-label="Prises" hidden>
       <header class="view-head">
         <h1>Prises</h1>
@@ -105,6 +114,9 @@
   <nav class="tabs" aria-label="Sections">
     <button type="button" data-tab="miroir" aria-current="page">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 14c2.5 0 2.5-6 5-6s2.5 9 5 9 2.5-12 5-12 2.5 6 5 6"/></svg><span>Miroir</span>
+    </button>
+    <button type="button" data-tab="bilan">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M8.5 10l1.8 1.8L14 8.2M8.5 16h7"/></svg><span>Bilan</span>
     </button>
     <button type="button" data-tab="prises">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="6.5" r="1.6"/><circle cx="5.5" cy="12" r="1.6"/><circle cx="5.5" cy="17.5" r="1.6"/><path d="M10 6.5h10M10 12h10M10 17.5h10"/></svg><span>Prises</span>

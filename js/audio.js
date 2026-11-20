@@ -147,9 +147,10 @@ export class MicEngine extends EventTarget {
     this.dispatchEvent(new CustomEvent('frame', { detail: frame }));
   }
 
-  startRecording() {
+  startRecording(meta = null) {
     if (!this.running || this.recording) return;
     this.recording = {
+      meta,
       chunks: [],
       frames: { t: [], f0: [], db: [], c: [] },
       t0: this.written / this.sr,

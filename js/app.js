@@ -4,9 +4,10 @@ import { hzToMidi, midiToHz, noteName, centsOff } from './notes.js';
 import { summarize, percentile, fmt } from './analysis.js';
 import { encodeWav } from './wav.js';
 import * as store from './store.js';
+import { createBilan } from './bilan.js';
 
-export const VERSION = '0.1.1';
-const VIEWS = ['miroir', 'prises', 'micro'];
+export const VERSION = '0.2.0';
+const VIEWS = ['miroir', 'bilan', 'prises', 'micro'];
 const $ = (s) => document.querySelector(s);
 
 // Réglages gardés sur l'appareil
@@ -72,6 +73,7 @@ function loop(ts) {
     lastText = ts;
     renderReadout();
     if (currentView === 'micro') renderLevel();
+    if (currentView === 'bilan') bilan.tick();
   }
   requestAnimationFrame(loop);
 }
@@ -174,7 +176,7 @@ engine.addEventListener('stop', async (e) => {
   renderMicState();
   renderMicInfo();
   releaseWake();
-  if (e.detail.recording) await saveRecording(e.detail.recording);
+  if (e.detail.recording) await finishRecording(e.detail.recording);
   if (e.detail.reason === 'ended') toast("Le micro s'est arrêté : débranché, ou pris par une autre appli.", true);
 });
 
@@ -284,7 +286,7 @@ ui.btnRec.addEventListener('click', async () => {
     ui.recTime.textContent = '0:00';
     recTimer = setInterval(() => { ui.recTime.textContent = clock((performance.now() - t0) / 1000); }, 250);
   } else {
-    await saveRecording(engine.stopRecording());
+    await finishRecording(engine.stopRecording());
   }
 });
 
@@ -298,20 +300,22 @@ ui.btnReset.addEventListener('click', () => {
   renderStats();
 });
 
-async function saveRecording(rec) {
+async function finishRecording(rec) {
   clearInterval(recTimer);
   recTimer = null;
   ui.btnRec.classList.remove('on');
   ui.recLabel.textContent = 'Enregistrer';
   ui.recTime.textContent = '';
+  const meta = rec && rec.meta;
   if (!rec || rec.duration < 0.5) {
     toast('Prise trop courte, non gardée.');
-    return;
+    if (meta) bilan.onSaved(null, meta);
+    return null;
   }
   const d = rec.startedAt;
   const prise = {
-    id: d.toISOString(),
-    name: 'Prise du ' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    id: meta ? meta.bilan + '/' + meta.code : d.toISOString(),
+    name: meta ? meta.code : 'Prise du ' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
     createdAt: d.toISOString(),
     duration: rec.duration,
     sampleRate: rec.sr,
@@ -321,13 +325,21 @@ async function saveRecording(rec) {
     wav: encodeWav(rec.chunks, rec.sr),
     version: VERSION,
   };
+  if (meta) {
+    prise.bilan = meta.bilan;
+    prise.code = meta.code;
+  }
   try {
     await store.put(prise);
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-    toast('Prise enregistrée (' + clock(rec.duration) + '). Retrouve-la dans Prises.');
+    toast(meta ? 'Prise ' + meta.code.split('-')[0] + ' gardée (' + clock(rec.duration) + ').' : 'Prise enregistrée (' + clock(rec.duration) + '). Retrouve-la dans Prises.');
     if (currentView === 'prises') renderPrises();
+    if (meta) bilan.onSaved(prise, meta);
+    return prise;
   } catch (err) {
     toast("Impossible de garder la prise sur l'appareil (" + (err && err.name) + ').', true);
+    if (meta) bilan.onSaved(null, meta);
+    return null;
   }
 }
 
@@ -419,27 +431,50 @@ function exportJson(p) {
   };
 }
 
-async function sharePrise(p) {
+function filesForPrise(p) {
   const base = slug(p.name);
-  const files = [
+  return [
     new File([p.wav], base + '.wav', { type: 'audio/wav' }),
     new File([JSON.stringify(exportJson(p))], base + '.json', { type: 'application/json' }),
   ];
+}
+
+// Partage : menu de partage du système, sinon téléchargement. Renvoie false si ça a échoué.
+async function shareFiles(files, title) {
   if (navigator.canShare && navigator.canShare({ files })) {
-    try { await navigator.share({ files, title: p.name }); } catch (e) {
-      if (e.name !== 'AbortError') toast('Partage impossible (' + e.name + ').', true);
+    try {
+      await navigator.share({ files, title });
+      return true;
+    } catch (e) {
+      if (e.name === 'AbortError') return true;
+      toast('Partage impossible (' + e.name + ').', true);
+      return false;
     }
-    return;
   }
-  for (const f of files) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(f);
-    a.download = f.name;
-    document.body.append(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  try {
+    for (const f of files) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(f);
+      a.download = f.name;
+      document.body.append(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    }
+    return true;
+  } catch (e) {
+    toast('Partage impossible.', true);
+    return false;
   }
 }
+
+async function sharePrise(p) {
+  await shareFiles(filesForPrise(p), p.name);
+}
+
+const bilan = createBilan({
+  engine, store, el, button, clock, toast, startMic, isBluetooth,
+  playPrise: togglePlay, filesForPrise, shareFiles, finishRecording, version: VERSION,
+});
 
 // ---------- Navigation ----------
 document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
@@ -450,6 +485,7 @@ function show(name) {
   document.querySelectorAll('.view').forEach((v) => { v.hidden = v.dataset.view !== name; });
   document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === name ? 'page' : 'false'));
   if (name === 'prises') renderPrises();
+  if (name === 'bilan') bilan.open();
   if (name === 'micro') { renderMicInfo(); refreshDevices(); renderLevel(); }
   if (name === 'miroir') requestAnimationFrame(() => trace.resize());
   try { history.replaceState(null, '', '#' + name); } catch (e) { /* sans effet */ }
@@ -501,4 +537,4 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 }
 
 // Accès pour les tests automatisés
-window.__voix = { engine, store, VERSION };
+window.__voix = { engine, store, bilan, VERSION };
