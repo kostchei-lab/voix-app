@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voix</title>
+<meta name="description" content="Miroir de voix : hauteur, intonation et volume en direct, prises enregistrées.">
+<meta name="theme-color" content="#F1F3F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D131B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Voix">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="bar">
+    <span class="brand"><span class="dot" aria-hidden="true"></span>Voix</span>
+    <span class="chip" id="micChip">Micro coupé</span>
+  </header>
+
+  <main id="main">
+    <section class="view view-miroir" data-view="miroir" aria-label="Miroir">
+      <div class="readout">
+        <div class="note stale" id="note">—</div>
+        <div class="readout-sub"><span id="cents"></span><span id="hz"></span></div>
+      </div>
+      <div class="stage">
+        <canvas id="trace" aria-label="Courbe de hauteur de ta voix"></canvas>
+        <p class="stage-empty" id="stageEmpty">Active le micro et parle : ta voix s'affiche ici, du grave en bas à l'aigu en haut. Le volume défile tout en bas.</p>
+      </div>
+      <dl class="stats">
+        <div><dt>Hauteur médiane</dt><dd><span id="stMed">—</span><small id="stMedHz"></small></dd></div>
+        <div><dt>Étendue</dt><dd><span id="stRange">—</span><small>de 10 à 90 %</small></dd></div>
+        <div><dt>Volume</dt><dd><span id="stVol">—</span><small>relatif</small></dd></div>
+      </dl>
+      <div class="stats-foot">
+        <p class="stats-note">Sur tes 30 dernières secondes de voix.</p>
+        <button type="button" id="btnReset" class="link-btn" hidden>Effacer</button>
+      </div>
+      <div class="controls">
+        <button type="button" id="btnMic" class="btn primary">Activer le micro</button>
+        <button type="button" id="btnRec" class="btn rec" hidden><span class="rec-dot" aria-hidden="true"></span><span id="recLabel">Enregistrer</span><span id="recTime" class="rec-time"></span></button>
+      </div>
+    </section>
+
+    <section class="view view-prises" data-view="prises" aria-label="Prises" hidden>
+      <header class="view-head">
+        <h1>Prises</h1>
+        <p>Gardées sur cet appareil. « Partager » envoie le son (.wav) et les mesures (.json), par exemple vers Fichiers pour me les déposer sur GitHub.</p>
+      </header>
+      <p class="empty" id="prisesEmpty">Aucune prise pour l'instant. Dans Miroir, active le micro puis touche « Enregistrer ».</p>
+      <ul class="prises" id="prisesList"></ul>
+    </section>
+
+    <section class="view view-micro" data-view="micro" aria-label="Micro" hidden>
+      <header class="view-head">
+        <h1>Micro</h1>
+        <p>Choix de l'entrée, réglages appliqués et niveaux.</p>
+      </header>
+      <div class="field">
+        <label for="deviceSelect">Entrée</label>
+        <select id="deviceSelect"><option value="">Micro par défaut du système</option></select>
+        <p class="hint">La liste se remplit une fois le micro autorisé. Sur iPhone, un micro branché en USB-C, comme le récepteur DJI, passe en priorité.</p>
+      </div>
+      <div class="panel">
+        <h2>État</h2>
+        <dl class="kv" id="micInfo"></dl>
+      </div>
+      <div class="panel">
+        <h2>Niveaux</h2>
+        <div class="meter" aria-hidden="true"><span id="levelBar"></span></div>
+        <p class="kv-line"><span id="levelNow">—</span><span id="levelPeak">Crête —</span><span id="levelClips">Saturations 0</span></p>
+        <div class="row">
+          <button type="button" id="btnNoise" class="btn small">Mesurer le bruit de fond</button>
+          <button type="button" id="btnPeakReset" class="btn small ghost">Remettre la crête à zéro</button>
+        </div>
+        <p class="hint" id="noiseResult">Parle fort une phrase : la crête doit rester sous −3 dB, sans saturation. Sinon, baisse le gain du récepteur.</p>
+      </div>
+      <div class="panel">
+        <h2>Notation</h2>
+        <fieldset class="seg">
+          <legend class="sr">Notation des notes</legend>
+          <label><input type="radio" name="notation" value="fr"> do ré mi <small>la3 = 440 Hz</small></label>
+          <label><input type="radio" name="notation" value="en"> C D E <small>A4 = 440 Hz</small></label>
+        </fieldset>
+      </div>
+      <div class="panel">
+        <h2>Réglages du DJI Mic</h2>
+        <ul class="hint-list">
+          <li>Low Cut désactivé : ce filtre coupe sous 150 Hz, là où se trouve le bas de ta voix.</li>
+          <li>Mode Mono (M).</li>
+          <li>Émetteur au milieu du torse, 15 à 20 cm sous le menton, toujours au même endroit.</li>
+        </ul>
+      </div>
+      <p class="foot">Voix · version <span id="version"></span>. Ajoute l'appli à ton écran d'accueil (Partager → Sur l'écran d'accueil) : iOS gardera tes prises plus sûrement.</p>
+    </section>
+  </main>
+
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" data-tab="miroir" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 14c2.5 0 2.5-6 5-6s2.5 9 5 9 2.5-12 5-12 2.5 6 5 6"/></svg><span>Miroir</span>
+    </button>
+    <button type="button" data-tab="prises">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="6.5" r="1.6"/><circle cx="5.5" cy="12" r="1.6"/><circle cx="5.5" cy="17.5" r="1.6"/><path d="M10 6.5h10M10 12h10M10 17.5h10"/></svg><span>Prises</span>
+    </button>
+    <button type="button" data-tab="micro">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span>Micro</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</div>
+</body>
+</html>
