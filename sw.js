@@ -1,5 +1,5 @@
 // Fonctionne hors connexion : réseau d'abord, copie locale en secours.
-const CACHE = 'voix-0.1.0';
+const CACHE = 'voix-0.1.1';
 const SHELL = [
   './',
   'index.html',

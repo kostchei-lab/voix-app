@@ -5,7 +5,7 @@ import { summarize, percentile, fmt } from './analysis.js';
 import { encodeWav } from './wav.js';
 import * as store from './store.js';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.1.1';
 const VIEWS = ['miroir', 'prises', 'micro'];
 const $ = (s) => document.querySelector(s);
 
@@ -188,7 +188,8 @@ function renderMicState() {
   ui.btnReset.hidden = !on;
   ui.stageEmpty.hidden = on || trace.frames.length > 0;
   const info = engine.info();
-  ui.chip.textContent = info ? info.label : 'Micro coupé';
+  ui.chip.textContent = info ? info.label + (isBluetooth(info.label) ? ' · Bluetooth' : '') : 'Micro coupé';
+  ui.chip.classList.toggle('warn', !!info && isBluetooth(info.label));
 }
 
 async function refreshDevices() {
@@ -213,6 +214,13 @@ $('#deviceSelect').addEventListener('change', async (e) => {
   }
 });
 
+// Micros Bluetooth : son compressé et retraité (bande coupée, volume ajusté
+// automatiquement). Mesuré le 20 novembre : AirPods coupés à 11 kHz, Bose à 7 kHz.
+const BLUETOOTH = /airpods|bose|beats|buds|bluetooth|headset|mains libres|hands-free/i;
+export function isBluetooth(label) {
+  return BLUETOOTH.test(label || '');
+}
+
 function yn(v) {
   return v === true ? 'activé' : v === false ? 'désactivé' : 'non indiqué';
 }
@@ -229,7 +237,8 @@ function renderMicInfo() {
       ['Canaux', i.channelCount != null ? String(i.channelCount) : 'non indiqué'],
     ]
     : [['Micro', 'coupé']];
-  $('#micInfo').replaceChildren(...rows.flatMap(([k, v]) => [el('dt', '', k), el('dd', '', v)]));
+  if (i && isBluetooth(i.label)) rows.push(['Attention', 'micro Bluetooth : le son est compressé et retraité. Bon pour écouter, pas pour mesurer. Préfère le DJI.']);
+  $('#micInfo').replaceChildren(...rows.flatMap(([k, v]) => [el('dt', '', k), el('dd', k === 'Attention' ? 'warn' : '', v)]));
 }
 
 $('#btnNoise').addEventListener('click', async () => {

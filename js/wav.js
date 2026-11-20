@@ -25,7 +25,7 @@ export function floatToInt16(f) {
   const out = new Int16Array(f.length);
   for (let i = 0; i < f.length; i++) {
     const s = f[i] < -1 ? -1 : f[i] > 1 ? 1 : f[i];
-    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    out[i] = Math.round(s < 0 ? s * 0x8000 : s * 0x7fff);
   }
   return out;
 }
