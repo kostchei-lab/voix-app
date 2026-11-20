@@ -1,11 +1,13 @@
 // Fonctionne hors connexion : réseau d'abord, copie locale en secours.
-const CACHE = 'voix-0.2.0';
+const CACHE = 'voix-0.3.0';
 const SHELL = [
   './',
   'index.html',
   'css/app.css',
   'js/app.js',
   'js/bilan.js',
+  'js/parole.js',
+  'js/projection.js',
   'js/audio.js',
   'js/pitch.js',
   'js/notes.js',

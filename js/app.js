@@ -5,9 +5,10 @@ import { summarize, percentile, fmt } from './analysis.js';
 import { encodeWav } from './wav.js';
 import * as store from './store.js';
 import { createBilan } from './bilan.js';
+import { createParole } from './parole.js';
 
-export const VERSION = '0.2.0';
-const VIEWS = ['miroir', 'bilan', 'prises', 'micro'];
+export const VERSION = '0.3.0';
+const VIEWS = ['miroir', 'parole', 'bilan', 'prises', 'micro'];
 const $ = (s) => document.querySelector(s);
 
 // Réglages gardés sur l'appareil
@@ -74,6 +75,7 @@ function loop(ts) {
     renderReadout();
     if (currentView === 'micro') renderLevel();
     if (currentView === 'bilan') bilan.tick();
+    if (currentView === 'parole') parole.tick();
   }
   requestAnimationFrame(loop);
 }
@@ -475,6 +477,8 @@ const bilan = createBilan({
   engine, store, el, button, clock, toast, startMic, isBluetooth,
   playPrise: togglePlay, filesForPrise, shareFiles, finishRecording, version: VERSION,
 });
+const parole = createParole({ engine, store, el, button, toast, startMic, isBluetooth, shareFiles, version: VERSION });
+
 
 // ---------- Navigation ----------
 document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
@@ -486,6 +490,7 @@ function show(name) {
   document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === name ? 'page' : 'false'));
   if (name === 'prises') renderPrises();
   if (name === 'bilan') bilan.open();
+  if (name === 'parole') parole.open();
   if (name === 'micro') { renderMicInfo(); refreshDevices(); renderLevel(); }
   if (name === 'miroir') requestAnimationFrame(() => trace.resize());
   try { history.replaceState(null, '', '#' + name); } catch (e) { /* sans effet */ }
@@ -537,4 +542,4 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 }
 
 // Accès pour les tests automatisés
-window.__voix = { engine, store, bilan, VERSION };
+window.__voix = { engine, store, bilan, parole, VERSION };

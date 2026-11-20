@@ -2,5 +2,5 @@
   "name": "voix-app",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node tests/pitch.test.js" }
+  "scripts": { "test": "node tests/pitch.test.js && node tests/projection.test.js" }
 }

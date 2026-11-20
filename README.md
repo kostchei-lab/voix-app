@@ -3,6 +3,14 @@
 Appli web d'entraînement vocal, pensée pour l'iPhone (Safari, ajoutée à l'écran d'accueil).
 Tout se passe sur l'appareil : aucun son ne part sur Internet.
 
+## Nouveau dans la version 0.3
+
+- **Parole** : exercices de prise de parole. Premier exercice : l'**échelle de projection**.
+  Une phrase de référence à voix normale, puis des paliers à +2, +4 et +6 dB, avec deux jauges en direct
+  (volume par rapport à la référence, hauteur avec une limite à +2 demi-tons), un verdict après chaque phrase,
+  et un dernier passage « sans regarder » (jauges masquées). Score de séance : montée de hauteur estimée pour +6 dB
+  et pente en cents par dB, gardés sur l'appareil, avec l'historique, une courbe d'évolution et un export JSON.
+
 ## Ce que fait la version 0.2
 
 - **Miroir** : la hauteur de ta voix en direct sur une portée (do ré mi, la3 = 440 Hz), le volume en dessous,
@@ -22,7 +30,8 @@ Tout se passe sur l'appareil : aucun son ne part sur Internet.
 
 ## Tests
 
-- `npm test` : détection de hauteur sur signaux synthétiques (Node).
+- `npm test` : détection de hauteur sur signaux synthétiques et calculs de l'échelle de projection (Node).
+- `node tests/e2e-parole.cjs <silence.wav> <dossier>` : séance complète d'échelle de projection, phrases injectées.
 - `node tests/e2e.cjs <voix.wav> <dossier>` et `node tests/e2e-bilan.cjs <voix.wav> <dossier>` : tests de bout en bout
   dans Chromium avec un faux micro
   (fichier créé par `python3 tests/make-test-voice.py <voix.wav>`).
