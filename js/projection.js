@@ -39,8 +39,13 @@ export const STEPS = [
 ];
 
 // Découpe en direct : on lui passe chaque mesure (toutes les 20 ms).
+// Options : endSilence (mesures sans voix qui closent la phrase), maxFrames (mesures voisées au plus).
 export class PhraseCatcher {
-  constructor() { this.reset(); }
+  constructor(opts = {}) {
+    this.endSilence = opts.endSilence || END_SILENCE;
+    this.maxFrames = opts.maxFrames || MAX_FRAMES;
+    this.reset();
+  }
   reset() {
     this.frames = [];
     this.started = false;
@@ -59,12 +64,14 @@ export class PhraseCatcher {
     } else {
       this.silent++;
     }
-    if (this.silent >= END_SILENCE || this.frames.length >= MAX_FRAMES) {
-      const out = this.frames;
-      this.reset();
-      return out;
-    }
+    if (this.silent >= this.endSilence || this.frames.length >= this.maxFrames) return this.flush();
     return null;
+  }
+  // Clôt la phrase tout de suite (bouton « J'ai fini ») et renvoie ce qui a été entendu.
+  flush() {
+    const out = this.frames;
+    this.reset();
+    return out;
   }
 }
 

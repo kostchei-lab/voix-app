@@ -7,7 +7,7 @@ import * as store from './store.js';
 import { createBilan } from './bilan.js';
 import { createParole } from './parole.js';
 
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
 const VIEWS = ['miroir', 'parole', 'bilan', 'prises', 'micro'];
 const $ = (s) => document.querySelector(s);
 
@@ -70,6 +70,7 @@ engine.addEventListener('frame', (e) => {
 let lastText = 0;
 function loop(ts) {
   if (currentView === 'miroir') trace.draw(engine.running);
+  if (currentView === 'parole') parole.draw();
   if (ts - lastText > 80) {
     lastText = ts;
     renderReadout();
@@ -477,7 +478,9 @@ const bilan = createBilan({
   engine, store, el, button, clock, toast, startMic, isBluetooth,
   playPrise: togglePlay, filesForPrise, shareFiles, finishRecording, version: VERSION,
 });
-const parole = createParole({ engine, store, el, button, toast, startMic, isBluetooth, shareFiles, version: VERSION });
+const parole = createParole({
+  engine, store, el, button, toast, startMic, isBluetooth, shareFiles, version: VERSION, notation: () => settings.notation,
+});
 
 
 // ---------- Navigation ----------

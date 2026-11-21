@@ -297,3 +297,15 @@ select { font: inherit; font-size: 16px; width: 100%; padding: 10px 12px; border
 .view-parole .step .read { padding: 10px 14px; font-size: 17px; line-height: 1.5; }
 .view-parole .step-how { font-size: 16px; }
 .proj-status { min-height: 1.6em; }
+
+/* Zone calme */
+.calme-live { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; min-height: 34px; }
+.calme-hz { font-family: var(--f-num); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.calme-msg { font-size: 15px; font-weight: 600; color: var(--muted); }
+.calme-hz.bad + .calme-msg { color: var(--rec); }
+.calme-hz.good + .calme-msg { color: var(--ok); }
+.calme-stage { height: 170px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); transition: box-shadow 120ms; }
+.calme-stage.out { border-color: var(--rec); box-shadow: 0 0 0 2px var(--rec); }
+.calme-canvas { display: block; width: 100%; height: 100%; }
+.calme-time { font-family: var(--f-num); font-variant-numeric: tabular-nums; color: var(--ink); }
+.trend .t-zone { fill: var(--zone); stroke: var(--ok); stroke-width: 0.5; }

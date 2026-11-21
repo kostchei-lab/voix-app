@@ -11,7 +11,9 @@ export class Trace {
     this.center = 52;
     this.targetCenter = 52;
     this.notation = 'fr';
-    this.zone = null;
+    this.zone = null; // { lo, hi } en demi-tons, avec labels: { lo, hi } facultatifs
+    this.fixed = false; // true : portée fixe, sans recentrage automatique
+    this.showNotes = true; // noms des notes sur la portée
     this.lastT = 0;
     this.lastWall = 0;
     this.readColors();
@@ -32,6 +34,7 @@ export class Trace {
       line: v('--trace'),
       level: v('--level'),
       zone: v('--zone'),
+      ok: v('--ok'),
       sep: v('--line'),
     };
   }
@@ -61,6 +64,7 @@ export class Trace {
   }
 
   _recenter(now) {
+    if (this.fixed) return;
     const mids = [];
     for (const f of this.frames) if (f.f0 > 0 && f.t > now - 4) mids.push(hzToMidi(f.f0));
     if (mids.length > 10) {
@@ -96,6 +100,16 @@ export class Trace {
       const y1 = y(this.zone.hi);
       const y2 = y(this.zone.lo);
       g.fillRect(0, y1, w, y2 - y1);
+      if (this.zone.labels) {
+        g.save();
+        g.font = '600 11px -apple-system, system-ui, sans-serif';
+        g.fillStyle = this.c.ok;
+        g.textBaseline = 'bottom';
+        g.fillText(this.zone.labels.hi, 6, y1 - 2);
+        g.textBaseline = 'top';
+        g.fillText(this.zone.labels.lo, 6, y2 + 2);
+        g.restore();
+      }
     }
 
     const pxPer = ph / this.span;
@@ -112,7 +126,7 @@ export class Trace {
       g.moveTo(0, yy);
       g.lineTo(w, yy);
       g.stroke();
-      if (nat && (pxPer >= 12 || pc === 0 || pc === 9)) {
+      if (this.showNotes && nat && (pxPer >= 12 || pc === 0 || pc === 9)) {
         g.fillStyle = this.c.label;
         g.fillText(noteName(m, this.notation), 6, yy - 6);
       }

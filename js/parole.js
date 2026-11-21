@@ -1,14 +1,15 @@
-// Onglet « Parole » : exercices de prise de parole. Pour l'instant : l'échelle de projection.
+// Onglet « Parole » : exercices de prise de parole. Échelle de projection (ici) et zone calme (zone-calme.js).
 import {
   STEPS, PHRASE, LIMIT_ST, VOL_TOL_DB, BILAN1_MONTEE_A6,
   PhraseCatcher, summarizePhrase, judge, sessionScore,
 } from './projection.js';
 import { hzToMidi } from './notes.js';
 import { percentile, fmt } from './analysis.js';
+import { createCalme } from './zone-calme.js';
 
 const EXERCICES = [
   { key: 'projection', title: 'Échelle de projection', what: 'Parler plus fort sans que la voix monte.', ready: true },
-  { key: 'calme', title: 'Zone calme', what: 'Parler dans ta zone grave, entre 125 et 145 Hz.' },
+  { key: 'calme', title: 'Zone calme', what: 'Parler debout avec ta voix du calme, entre 125 et 145 Hz.', ready: true },
   { key: 'fins', title: 'Fins d’idée', what: 'Faire descendre la voix en fin de phrase.' },
   { key: 'souffle', title: 'Résonance et souffle', what: 'Paille, voix résonante, tenue chronométrée.' },
 ];
@@ -20,7 +21,7 @@ export function createParole(ctx) {
   const { engine, store, el, button, toast, startMic, isBluetooth, shareFiles, version } = ctx;
   const root = document.querySelector('#paroleRoot');
 
-  let screen = 'menu'; // menu | exo | score
+  let screen = 'menu'; // menu | exo | score | calme
   let seance = null; // { id, date, ref, essais, index }
   let phase = 'idle'; // idle | listening | verdict
   let lastVerdict = null;
@@ -29,6 +30,12 @@ export function createParole(ctx) {
   const recent = []; // dernières mesures voisées, pour les jauges
   let gauges = null;
   let levelBar = null;
+  const calme = createCalme({
+    ...ctx,
+    root,
+    rerender: () => render(),
+    back: async () => { screen = 'menu'; await load(); render(); },
+  });
 
   // ---------- Mesures ----------
   engine.addEventListener('frame', (e) => {
@@ -72,6 +79,7 @@ export function createParole(ctx) {
     const head = document.querySelector('.view-parole .view-head');
     if (head) head.hidden = screen !== 'menu';
     if (screen === 'menu') renderMenu();
+    else if (screen === 'calme') calme.render();
     else if (screen === 'exo') renderExo();
     else renderScore();
   }
@@ -85,8 +93,8 @@ export function createParole(ctx) {
       li.append(txt);
       if (x.ready) {
         const b = button('Commencer', 'btn primary small');
-        b.id = 'btnProjStart';
-        b.addEventListener('click', startSeance);
+        b.id = x.key === 'calme' ? 'btnCalmeStart' : 'btnProjStart';
+        b.addEventListener('click', x.key === 'calme' ? startCalme : startSeance);
         li.append(b);
       } else {
         li.append(el('span', 'exo-soon', 'Bientôt'));
@@ -95,6 +103,12 @@ export function createParole(ctx) {
     }
     root.append(list);
     renderHistory();
+    root.append(calme.historyPanel());
+  }
+
+  function startCalme() {
+    screen = 'calme';
+    calme.start();
   }
 
   function renderHistory() {
@@ -331,6 +345,7 @@ export function createParole(ctx) {
 
   // Appelé par la boucle d'affichage (toutes les 80 ms environ)
   function tick() {
+    if (screen === 'calme') { calme.tick(); return; }
     if (screen !== 'exo') return;
     if (levelBar) {
       const v = engine.running ? Math.max(0, Math.min(1, (engine.lastDb + 70) / 70)) : 0;
@@ -446,6 +461,12 @@ export function createParole(ctx) {
     try {
       seances = (await store.allSeances()).filter((s) => s.exo === 'projection').sort((a, b) => a.date.localeCompare(b.date));
     } catch (e) { seances = []; }
+    await calme.load();
+  }
+
+  // Appelé à chaque image par la boucle d'affichage (courbe de la zone calme).
+  function draw() {
+    if (screen === 'calme') calme.draw();
   }
 
   async function open() {
@@ -453,5 +474,5 @@ export function createParole(ctx) {
     render();
   }
 
-  return { open, tick, state: () => ({ screen, phase, seance, seances }) };
+  return { open, tick, draw, calme, state: () => ({ screen, phase, seance, seances }) };
 }
