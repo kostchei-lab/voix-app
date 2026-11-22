@@ -30,6 +30,20 @@ Tout se passe sur l'appareil : aucun son ne part sur Internet.
 - **Micro** : choix de l'entrée, vérification que les traitements automatiques sont coupés, niveaux, crête,
   saturations, bruit de fond.
 
+## Autres applis du dépôt (prototypes, 22 novembre 2026)
+
+- **`poesies/`, Mes poésies** (iPad, enfants de 7 à 10 ans) : apprendre une poésie en trois étapes (je lis, avec des trous,
+  par cœur). L'iPad suit le texte mot à mot (reconnaissance vocale de Safari), souffle une lettre puis le mot quand on
+  bloque, marque les mots sautés et donne des étoiles. Poésies ajoutées par le parent, gardées sur l'iPad.
+- **`souffleur/`, Souffleur** (iPhone, théâtre), phase « travailler le jeu » : la lecture de Claude (mots à appuyer,
+  respirations, intention, conseil) à côté de chaque réplique, et pour chaque prise le débit, les pauses, la mélodie
+  (étendue, fin montante ou descendante) et le volume, avec réécoute et rappel de la prise précédente. Réutilise le micro
+  et la mesure de hauteur de Voix (`js/`).
+- **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v3 : enchaîner sans toucher).
+
+Tests : `npm test` (dont les mesures de Souffleur), `node tests/e2e-poesies.cjs . <captures>`,
+`python3 tests/make-test-replique.py <replique.wav>` puis `node tests/e2e-souffleur-jeu.cjs . <replique.wav> <captures>`.
+
 ## Technique
 
 - Capture : `getUserMedia` avec annulation d'écho, réduction de bruit et gain automatique désactivés, AudioWorklet.
