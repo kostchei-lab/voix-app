@@ -1,4 +1,5 @@
 // Fonctionne hors connexion : réseau d'abord, copie locale en secours.
+// Ne supprime que les anciennes copies de Voix : Poésies et Souffleur ont les leurs sur le même site.
 const CACHE = 'voix-0.4.0';
 const SHELL = [
   './',
@@ -31,7 +32,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('voix-') && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
