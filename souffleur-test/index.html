@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Test souffleur</title>
-<meta name="description" content="Test de la reconnaissance de la voix en français sur iPhone, pour l'appli souffleur.">
+<title>Test souffleur v2</title>
+<meta name="description" content="Test v2 sur iPhone : enchaîner la réplique du partenaire (voix de synthèse) et l'écoute de ta réplique, quatre variantes.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,6 +21,7 @@
     --accent: #E08A7A; --ok: #6FCF97; --bad: #FF8A80; --soft: #2A2520; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
 main { max-width: 680px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom)); }
 h1 { font-size: 26px; margin: 8px 0 4px; letter-spacing: -0.01em; }
@@ -28,81 +29,89 @@ h2 { font-size: 18px; margin: 0 0 6px; }
 p { margin: 6px 0; }
 .lead { color: var(--muted); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 14px 0; }
-.status { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: 15px; }
+.status { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0 0; font-size: 15px; }
 .status dt { color: var(--muted); }
 .status dd { margin: 0; font-weight: 600; }
 .yes { color: var(--ok); } .no { color: var(--bad); }
+.picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+.picker button { border-radius: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.2; min-width: 0; }
+.picker .k { font-size: 22px; font-weight: 700; }
+.picker .lab { font-size: 12px; font-weight: 500; color: var(--muted); text-align: center; }
+.picker .res { font-size: 12px; font-weight: 700; }
+.picker button[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--soft); padding: 7px 3px; }
+.desc { font-size: 15px; }
+.phase { font-size: 21px; font-weight: 700; min-height: 1.5em; margin-top: 10px; }
+.cue { font-style: italic; color: var(--muted); margin-top: 10px; }
 .line { font-size: 19px; line-height: 1.55; padding: 10px 12px; border-radius: 10px; background: var(--soft); margin: 8px 0; }
-.line .w { border-radius: 4px; padding: 0 1px; transition: background 120ms; }
+.line .w { border-radius: 4px; padding: 0 1px; }
 .line .w.done { color: var(--ok); }
 .line .w.next { outline: 2px solid var(--accent); outline-offset: 1px; }
-.cue { font-style: italic; color: var(--muted); }
 .heard { min-height: 3.2em; font-size: 16px; padding: 8px 10px; border: 1px dashed var(--line); border-radius: 10px; }
-.heard .interim { color: var(--muted); }
+.heard .partner { color: var(--muted); font-style: italic; }
 .prompt { min-height: 1.6em; font-size: 22px; font-weight: 700; color: var(--accent); }
 .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 button { appearance: none; font: inherit; font-weight: 600; border-radius: 999px; padding: 11px 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-button.stop { background: var(--bad); color: #fff; border-color: var(--bad); }
+button.big { display: block; width: 100%; margin: 10px 0; font-size: 26px; padding: 20px; background: var(--accent); color: var(--bg); border-color: var(--accent); border-radius: 16px; }
 button:disabled { opacity: .45; }
 select { font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); max-width: 100%; }
-label { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 15px; }
+label { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font-size: 15px; }
 .score { font-weight: 700; }
-pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; background: var(--soft); padding: 10px; border-radius: 10px; max-height: 240px; overflow: auto; }
+.ask { border: 2px solid var(--accent); border-radius: 12px; padding: 10px 12px; margin-top: 12px; }
+.ask .row button { flex: 1 1 100%; text-align: left; border-radius: 12px; }
+pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; background: var(--soft); padding: 10px; border-radius: 10px; max-height: 260px; overflow: auto; }
 .small { font-size: 13px; color: var(--muted); }
 ol.steps { padding-left: 1.3rem; margin: 6px 0; }
+ol.steps li { margin: 4px 0; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Test : reconnaissance de la voix</h1>
-  <p class="lead">Ce test dit si ton iPhone peut suivre ce que tu dis, mot à mot, en français, et souffler quand tu bloques. Il ne garde rien et n’envoie rien ailleurs ; Safari peut toutefois faire transcrire le son par Apple.</p>
+  <h1>Test souffleur v2 : enchaîner</h1>
+  <p class="lead">Au premier test, l’iPhone suivait bien ta réplique, mais n’entendait plus rien quand la voix du partenaire venait de parler. Ce test compare quatre façons d’enchaîner, pour garder celle qui marche.</p>
   <div class="card">
-    <h2>Mode d’emploi</h2>
+    <h2>Mode d’emploi (≈ 15 min)</h2>
     <ol class="steps">
-      <li>Dans Safari : fais les tests 1 et 2, puis « Copier le rapport » et colle-le dans la conversation.</li>
-      <li>Ajoute cette page à l’écran d’accueil (Partager → Sur l’écran d’accueil), ouvre-la depuis l’icône, refais les tests 1 et 2 et copie le nouveau rapport.</li>
+      <li>Dans Safari, touche « Lancer » cinq fois : la page passe seule aux variantes D, A, B, C, puis D encore. Dis ta réplique à chaque fois, d’une voix normale.</li>
+      <li>Après B, réponds à la question sur le son.</li>
+      <li>Touche « Copier le rapport » et colle-le dans la conversation.</li>
+      <li>Ajoute la page à l’écran d’accueil (Partager → Sur l’écran d’accueil), ouvre-la depuis l’icône, refais la série et copie ce second rapport.</li>
     </ol>
     <dl class="status" id="status"></dl>
   </div>
 
-  <section class="card" id="test1">
-    <h2>Test 1 : dire une réplique</h2>
-    <p class="small">Lis la réplique à voix haute. Les mots reconnus passent en vert. Arrête-toi exprès au milieu quelques secondes : le souffleur doit donner la première lettre du mot suivant, puis une autre.</p>
-    <label>Réplique
-      <select id="lineSel"></select>
-    </label>
-    <div class="line" id="line1"></div>
-    <div class="prompt" id="prompt1" aria-live="polite"></div>
-    <div class="heard" id="heard1" aria-live="polite"></div>
-    <p class="score" id="score1"></p>
-    <label><input type="checkbox" id="autoRestart" checked> Relancer l’écoute si elle s’arrête toute seule</label>
+  <section class="card" id="scene">
+    <h2>La scène</h2>
+    <div class="picker" id="picker" role="group" aria-label="Variante"></div>
+    <p class="desc" id="desc"></p>
+    <p class="small" id="next"></p>
     <div class="row">
-      <button class="primary" id="go1">Écouter</button>
-      <button id="stop1" disabled>Arrêter</button>
+      <button class="primary" id="go">Lancer</button>
+      <button id="stop" disabled>Arrêter</button>
     </div>
-  </section>
-
-  <section class="card" id="test2">
-    <h2>Test 2 : donner la réplique</h2>
-    <p class="small">Une voix de synthèse lit la réplique du partenaire, puis l’écoute démarre seule et tu réponds. On vérifie que l’iPhone sait enchaîner les deux.</p>
-    <p class="cue" id="cue2"></p>
-    <div class="line" id="line2"></div>
-    <div class="prompt" id="prompt2" aria-live="polite"></div>
-    <div class="heard" id="heard2" aria-live="polite"></div>
-    <p class="score" id="score2"></p>
-    <label>Voix du partenaire
+    <div class="phase" id="phase" aria-live="polite"></div>
+    <button class="big" id="atoi" hidden>À toi</button>
+    <div class="ask" id="ask" hidden>
+      <p><strong>Question sur B :</strong> pendant B, la voix du partenaire sortait…</p>
+      <div class="row">
+        <button data-route="fort, par le haut-parleur (en bas)">Fort, par le haut-parleur (en bas)</button>
+        <button data-route="faiblement, par l’écouteur (en haut)">Faiblement, par l’écouteur (en haut)</button>
+        <button data-route="pas entendue">Je ne l’ai pas entendue</button>
+      </div>
+    </div>
+    <p class="cue" id="cue"></p>
+    <div class="line" id="line"></div>
+    <div class="prompt" id="prompt" aria-live="polite"></div>
+    <div class="heard" id="heard" aria-live="polite"></div>
+    <p class="score" id="score"></p>
+    <label id="voiceRow">Voix du partenaire
       <select id="voiceSel"></select>
     </label>
-    <div class="row">
-      <button class="primary" id="go2">Lancer la scène</button>
-      <button id="stop2" disabled>Arrêter</button>
-    </div>
   </section>
 
   <section class="card">
     <h2>Rapport</h2>
-    <p class="small">Ce qui s’est passé pendant les tests : à coller dans la conversation.</p>
+    <p class="small">Il reste sur ton iPhone jusqu’à « Effacer » et n’est envoyé nulle part ; Safari peut toutefois faire transcrire le son par Apple.</p>
     <div class="row">
       <button class="primary" id="copy">Copier le rapport</button>
       <button id="clear">Effacer</button>
@@ -114,15 +123,23 @@ ol.steps { padding-left: 1.3rem; margin: 6px 0; }
 
 <script>
 'use strict';
-// ---------- Textes du test (écrits pour le test, sans droits) ----------
-const LINES = [
-  'Je ne suis pas venu ici pour me taire, mais pour vous dire enfin ce que je pense.',
-  'Monsieur, vous vous trompez : ce n’est pas l’argent qui me retient, c’est la parole donnée.',
-  'Attendez. Avant de partir, écoutez-moi une dernière fois : demain, à l’aube, tout sera fini, et vous saurez que j’avais raison.',
-];
-const SCENE = { cue: 'Alors, qu’avez-vous à me dire ?', line: LINES[0] };
-const STALL_MS = 2500; // silence avant la première lettre soufflée
-const STEP_MS = 2000; // puis une lettre de plus toutes les 2 s
+// ---------- Réglages du test (répliques écrites pour le test, sans droits) ----------
+const SCENE = {
+  cue: 'Alors, qu’avez-vous à me dire ?',
+  line: 'Je ne suis pas venu ici pour me taire, mais pour vous dire enfin ce que je pense.',
+};
+const STALL_MS = 2500;   // silence avant la première lettre soufflée
+const STEP_MS = 2000;    // puis une lettre de plus toutes les 2 s
+const WAIT_A_MS = 1000;  // variante A : attente entre la fin de la voix et l'écoute
+const GRACE_MS = 700;    // variante B : ce qui arrive juste après la voix est encore attribué au partenaire
+const DEAF_MS = 20000;   // un essai s'arrête si rien n'est entendu pendant 20 s à ton tour
+const SEQ = ['D', 'A', 'B', 'C', 'D'];
+const VARIANTS = {
+  A: { label: 'Voix + 1 s', desc: 'A. La voix lit la réplique du partenaire. Une seconde après, l’écoute démarre seule : dis ta réplique.' },
+  B: { label: 'Micro avant', desc: 'B. L’écoute démarre dès ton toucher, puis la voix lit la réplique du partenaire, micro ouvert. Dis ensuite ta réplique. Repère d’où sort la voix : haut-parleur ou écouteur du haut.' },
+  C: { label: 'Bouton', desc: 'C. La voix lit la réplique du partenaire, puis un grand bouton « À toi » apparaît : touche-le, puis dis ta réplique.' },
+  D: { label: 'Texte seul', desc: 'D. Sans voix : lis la réplique du partenaire à l’écran, puis dis ta réplique. C’est le témoin : il a marché au premier test.' },
+};
 
 // ---------- Mots : découpe et comparaison ----------
 function norm(w) {
@@ -137,9 +154,11 @@ function displayWords(text) {
   }
   return out;
 }
-function words(text) {
-  return text.replace(/[’']/g, '’ ').replace(/-/g, ' ').split(/\s+/).map(norm).filter(Boolean);
+function tokens(text) {
+  return text.replace(/[’']/g, '’ ').replace(/-/g, ' ').split(/\s+/).filter((t) => norm(t));
 }
+function words(text) { return tokens(text).map(norm); }
+function join(toks) { return toks.map((t) => t + (/’$/.test(t) ? '' : ' ')).join('').trim(); }
 function lev(a, b) {
   const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
   for (let j = 1; j <= b.length; j++) d[0][j] = j;
@@ -150,56 +169,96 @@ function lev(a, b) {
 }
 function same(a, b) {
   if (a === b) return true;
-  if (a.length >= 4 && b.length >= 4 && lev(a, b) <= 1) return true;
-  return false;
+  return a.length >= 4 && b.length >= 4 && lev(a, b) <= 1;
 }
 // Suivi : combien de mots attendus ont été dits, dans l'ordre (on tolère un mot sauté ou ajouté).
 function follow(expected, heard) {
-  let i = 0, j = 0, matched = 0;
+  let i = 0, j = 0;
   while (i < expected.length && j < heard.length) {
-    if (same(expected[i], heard[j])) { i++; j++; matched++; continue; }
-    if (j + 1 < heard.length && same(expected[i], heard[j + 1])) { j += 2; i++; matched++; continue; }
-    if (i + 1 < expected.length && same(expected[i + 1], heard[j])) { i += 2; j++; matched++; continue; }
+    if (same(expected[i], heard[j])) { i++; j++; continue; }
+    if (j + 1 < heard.length && same(expected[i], heard[j + 1])) { j += 2; i++; continue; }
+    if (i + 1 < expected.length && same(expected[i + 1], heard[j])) { i += 2; j++; continue; }
     j++;
   }
-  return { progress: i, matched };
+  return i;
 }
+const SHOWN = displayWords(SCENE.line);
+const EXPECTED = SHOWN.map(norm);
+const CUE_WORDS = new Set(words(SCENE.cue));
 
-// ---------- Rapport ----------
-const t0 = performance.now();
-const log = [];
-const results = [];
-const ms = () => Math.round(performance.now() - t0);
+// ---------- Mémoire du rapport (sur l'iPhone seulement) ----------
+const KEY = 'souffleur-test-v2';
+function fresh() { return { log: [], results: [], ptr: 0 }; }
+let store = fresh();
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s && Array.isArray(s.log) && Array.isArray(s.results)) store = Object.assign(fresh(), s);
+} catch (e) { /* mémoire indisponible : le rapport vit le temps de la page */ }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* idem */ } }
+
+// ---------- Journal et rapport ----------
+const $ = (id) => document.getElementById(id);
+const now = () => performance.now();
+const t0 = now();
+const fmt = (ms) => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 function note(kind, detail = '') {
-  log.push(`${(ms() / 1000).toFixed(1)} s  ${kind}${detail ? ' : ' + detail : ''}`);
+  store.log.push(`${fmt(now() - t0)}  ${kind}${detail ? ' : ' + detail : ''}`);
+  if (store.log.length > 800) store.log.splice(0, store.log.length - 800);
+  save();
   renderReport();
 }
 const API = window.SpeechRecognition || window.webkitSpeechRecognition;
+const HAS_TTS = 'speechSynthesis' in window;
 const standalone = !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches));
-function frVoices() {
-  return ('speechSynthesis' in window) ? speechSynthesis.getVoices().filter((v) => /^fr/i.test(v.lang)) : [];
+function frVoices() { return HAS_TTS ? speechSynthesis.getVoices().filter((v) => /^fr/i.test(v.lang)) : []; }
+function resultLine(r) {
+  const parts = [
+    `${r.v}, essai ${r.n} (${r.where}) : ${r.progress}/${r.total} mots suivis en ${r.dur} (${r.why})`,
+    'premier mot entendu à ton tour : ' + (r.firstMs != null ? r.firstMs + ' ms après son début' : 'aucun'),
+    ...r.extra,
+  ];
+  if (r.partner != null) parts.push(`entendu pendant le partenaire « ${r.partner} »`);
+  if (r.v === 'B') parts.push('son de la voix, selon toi : ' + (r.route || 'pas répondu'));
+  parts.push(
+    `arrêts de l’iPhone ${r.ends}`,
+    `erreurs ${r.errors.join(', ') || 'aucune'}`,
+    `souffles ${r.hints.length ? r.hints.join(' | ') : 'aucun'}`,
+    `entendu à ton tour « ${r.heard} »`,
+  );
+  return parts.join(' ; ');
+}
+function synthesis() {
+  return 'ABCD'.split('').map((k) => {
+    const rs = store.results.filter((r) => r.v === k);
+    if (!rs.length) return `${k} (${VARIANTS[k].label}) : pas fait`;
+    const best = Math.max(...rs.map((r) => r.progress));
+    const heard = rs.filter((r) => r.userWords > 0).length;
+    return `${k} (${VARIANTS[k].label}) : ${rs.length} essai${rs.length > 1 ? 's' : ''}, meilleur ${best}/${EXPECTED.length} ; ta voix entendue ${heard} fois sur ${rs.length}`;
+  });
 }
 function report() {
   return [
-    'TEST SOUFFLEUR — rapport',
+    'TEST SOUFFLEUR v2 (enchaînement) — rapport',
     'Date : ' + new Date().toLocaleString('fr-FR'),
     'Navigateur : ' + navigator.userAgent,
     'Ouverte depuis l’écran d’accueil : ' + (standalone ? 'oui' : 'non'),
     'Reconnaissance : ' + (window.SpeechRecognition ? 'SpeechRecognition' : window.webkitSpeechRecognition ? 'webkitSpeechRecognition' : 'absente'),
-    'Voix de synthèse françaises : ' + frVoices().map((v) => v.name + (v.localService ? '' : ' (en ligne)')).join(', '),
+    'Voix de synthèse françaises : ' + (frVoices().map((v) => v.name + (v.localService ? '' : ' (en ligne)')).join(', ') || 'aucune'),
+    'Ordre conseillé : D, A, B, C, puis D',
     '',
-    'Résultats :',
-    ...(results.length ? results : ['(aucun)']),
+    'Synthèse :',
+    ...synthesis(),
+    '',
+    'Essais :',
+    ...(store.results.length ? store.results.map(resultLine) : ['(aucun)']),
     '',
     'Journal :',
-    ...log,
+    ...store.log,
   ].join('\n');
 }
-function renderReport() { document.getElementById('report').textContent = report(); }
-
-// ---------- État affiché ----------
+function renderReport() { $('report').textContent = report(); }
 function renderStatus() {
-  const dl = document.getElementById('status');
+  const dl = $('status');
   dl.replaceChildren();
   const add = (k, v, ok) => {
     const dt = document.createElement('dt'); dt.textContent = k;
@@ -212,184 +271,392 @@ function renderStatus() {
   add('Voix françaises', fr.length ? fr.length + ' voix' : 'aucune pour l’instant', fr.length > 0);
 }
 
+// ---------- Affichage de la scène ----------
+function paintLine(progress, active) {
+  const el = $('line');
+  el.replaceChildren();
+  SHOWN.forEach((w, k) => {
+    const s = document.createElement('span');
+    s.className = 'w' + (k < progress ? ' done' : k === progress && active ? ' next' : '');
+    s.textContent = w;
+    el.append(s, document.createTextNode(/[’'\-]$/.test(w) ? '' : ' '));
+  });
+}
+function paintHeard(partnerToks, userToks) {
+  const el = $('heard');
+  el.replaceChildren();
+  if (partnerToks.length) {
+    const p = document.createElement('span');
+    p.className = 'partner';
+    p.textContent = 'partenaire : ' + join(partnerToks) + ' — ';
+    el.append(p);
+  }
+  el.append(document.createTextNode(join(userToks)));
+}
+function phase(t) { $('phase').textContent = t; }
+
 // ---------- Une séance d'écoute ----------
-// opts : { name, text, lineEl, heardEl, promptEl, scoreEl, onDone }
-function makeSession(opts) {
-  const shown = displayWords(opts.text);
-  const expected = shown.map(norm);
-  let rec = null, active = false, finals = '', interim = '', startAt = 0, firstAt = 0, lastAt = 0;
-  let ends = 0, errors = [], hints = [], hintLevel = 0, hintTimer = null, progress = 0;
+// muted : le micro est ouvert mais c'est encore le partenaire qui parle (variante B).
+function makeSession(v, onDone) {
+  let rec = null, active = false, muted = false, base = '', finals = '', interim = '';
+  let ignoreN = 0, graceUntil = 0, startAt = now(), listenAt = 0, firstAt = 0, lastAt = 0;
+  let ends = 0, progress = 0, hintLevel = 0, timer = null, partnerText = null, finished = false;
+  let hooks = {}, listening = false;
+  const errors = [], hints = [], extra = [];
 
+  const heardToks = () => tokens(finals + ' ' + interim);
+  // Mots de ton tour : après ceux du partenaire ; on écarte aussi un reste de sa réplique en tête.
+  function userToks() {
+    const rest = heardToks().slice(ignoreN);
+    if (partnerText != null) {
+      while (rest.length && CUE_WORDS.has(norm(rest[0])) && !same(norm(rest[0]), EXPECTED[0])) rest.shift();
+    }
+    return rest;
+  }
   function paint() {
-    opts.lineEl.replaceChildren();
-    // Les mots affichés et les mots comparés se correspondent un à un (même découpe).
-    shown.forEach((w, k) => {
-      const s = document.createElement('span');
-      s.className = 'w' + (k < progress ? ' done' : k === progress && active ? ' next' : '');
-      s.textContent = w;
-      opts.lineEl.append(s, document.createTextNode(/[’'\-]$/.test(w) ? '' : ' '));
-    });
-    opts.heardEl.replaceChildren(document.createTextNode(finals + ' '));
-    const it = document.createElement('span'); it.className = 'interim'; it.textContent = interim;
-    opts.heardEl.append(it);
-    opts.scoreEl.textContent = expected.length ? `${progress} mots sur ${expected.length} suivis` : '';
+    paintLine(progress, active && !muted);
+    paintHeard(heardToks().slice(0, ignoreN), userToks());
+    $('score').textContent = `${progress} mots sur ${EXPECTED.length} suivis`;
   }
-
-  function update() {
-    const f = follow(expected, words(finals + ' ' + interim));
-    if (f.progress > progress) { progress = f.progress; hintLevel = 0; opts.promptEl.textContent = ''; }
+  function signalListening() {
+    if (listening) return;
+    listening = true;
+    if (hooks.onListening) hooks.onListening();
+  }
+  function onResults(fin, mid) {
+    finals = base + fin;
+    interim = mid;
+    const t = now();
+    if (muted || t < graceUntil) {
+      ignoreN = heardToks().length;
+      partnerText = join(heardToks());
+      paint();
+      return;
+    }
+    const mine = userToks();
+    if (!mine.length) { paint(); return; }
+    if (!firstAt) { firstAt = t; note(v + ' premier mot entendu', `${Math.round(t - listenAt)} ms après le début de ton tour`); }
+    lastAt = t;
+    const p = follow(EXPECTED, mine.map(norm));
+    if (p > progress) { progress = p; hintLevel = 0; $('prompt').textContent = ''; }
     paint();
-    if (progress >= expected.length) finish('réplique complète');
+    if (progress >= EXPECTED.length) finish('réplique complète');
   }
-
   function tick() {
     if (!active) return;
-    const idle = performance.now() - Math.max(lastAt, startAt);
-    const wait = STALL_MS + hintLevel * STEP_MS;
-    if (progress < expected.length && idle > wait && (lastAt || idle > STALL_MS + 1500)) {
-      hintLevel++;
-      const target = shown[progress].replace(/[\s.,:;!?«»]/g, '');
-      const k = Math.min(hintLevel, target.length);
-      const txt = k >= target.length ? target : target.slice(0, k) + '…';
-      opts.promptEl.textContent = 'Souffleur : « ' + txt + ' »';
-      hints.push(`${txt} (après ${(idle / 1000).toFixed(1)} s)`);
-      note(opts.name + ' souffle', txt);
+    if (!muted) {
+      const t = now();
+      const idle = t - Math.max(lastAt, listenAt);
+      if (progress < EXPECTED.length && idle > STALL_MS + hintLevel * STEP_MS && (lastAt || idle > STALL_MS + 1500)) {
+        hintLevel++;
+        const target = SHOWN[progress].replace(/[\s.,:;!?«»]/g, '');
+        const k = Math.min(hintLevel, target.length);
+        const txt = k >= target.length ? target : target.slice(0, k) + '…';
+        $('prompt').textContent = 'Souffleur : « ' + txt + ' »';
+        hints.push(`${txt} (après ${fmt(idle)}${lastAt ? '' : ', aucun mot entendu avant'})`);
+        note(v + ' souffle', txt);
+      }
+      if (!firstAt && t - listenAt > DEAF_MS) { finish(`rien entendu pendant ${DEAF_MS / 1000} s`); return; }
     }
-    hintTimer = setTimeout(tick, 250);
+    timer = setTimeout(tick, 250);
   }
-
   function startRec() {
     rec = new API();
     rec.lang = 'fr-FR';
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
-    rec.onstart = () => note(opts.name + ' écoute démarrée');
-    rec.onaudiostart = () => note(opts.name + ' son capté');
-    rec.onspeechstart = () => note(opts.name + ' parole détectée');
-    rec.onspeechend = () => note(opts.name + ' fin de parole détectée');
+    rec.onstart = () => {
+      note(v + ' écoute démarrée', 'voix de synthèse ' + (HAS_TTS && speechSynthesis.speaking ? 'en train de parler' : 'silencieuse'));
+      if (hooks.onStarted) hooks.onStarted();
+    };
+    rec.onaudiostart = () => { note(v + ' son capté'); signalListening(); };
+    rec.onspeechstart = () => note(v + ' parole détectée', muted ? 'pendant le partenaire' : 'à ton tour');
+    rec.onspeechend = () => note(v + ' fin de parole détectée');
     rec.onresult = (e) => {
-      const now = performance.now();
-      if (!firstAt) { firstAt = now; note(opts.name + ' premier résultat', `${Math.round(now - startAt)} ms après le départ`); }
-      lastAt = now;
       let fin = '', mid = '';
       for (let r = 0; r < e.results.length; r++) {
         const t = e.results[r][0].transcript;
         if (e.results[r].isFinal) fin += t + ' '; else mid += t + ' ';
       }
-      // Après une relance, les résultats repartent de zéro : on garde ce qui était déjà acquis.
-      finals = (rec._base || '') + fin;
-      interim = mid;
-      update();
+      onResults(fin, mid);
     };
-    rec.onerror = (e) => { errors.push(e.error); note(opts.name + ' erreur', e.error + (e.message ? ' — ' + e.message : '')); };
+    rec.onerror = (e) => { errors.push(e.error); note(v + ' erreur', e.error + (e.message ? ' — ' + e.message : '')); };
     rec.onend = () => {
       ends++;
-      note(opts.name + ' écoute terminée par l’iPhone', 'arrêt n° ' + ends);
-      if (active && document.getElementById('autoRestart').checked && ends < 8 && !errors.includes('not-allowed')) {
-        const base = finals + ' ' + interim;
+      note(v + ' écoute terminée par l’iPhone', 'arrêt n° ' + ends);
+      if (active && ends < 8 && !errors.includes('not-allowed') && !errors.includes('service-not-allowed')) {
+        // Après une relance, les résultats repartent de zéro : on garde ce qui était acquis.
+        base = finals + ' ' + interim;
         interim = '';
-        try { startRec(); rec._base = base; note(opts.name + ' relance'); } catch (err) { note(opts.name + ' relance impossible', err.message); finish('relance impossible'); }
+        try { startRec(); note(v + ' relance'); } catch (err) { note(v + ' relance impossible', err.message); finish('relance impossible'); }
       } else if (active) finish('arrêt de l’écoute');
     };
-    try { rec.start(); } catch (err) { note(opts.name + ' démarrage impossible', err.message); finish('démarrage impossible'); }
+    try { rec.start(); } catch (err) { note(v + ' démarrage impossible', err.message); finish('démarrage impossible'); }
   }
-
-  function start() {
-    if (!API) { opts.promptEl.textContent = 'Reconnaissance absente de ce navigateur.'; note(opts.name, 'reconnaissance absente'); return; }
-    active = true; finals = ''; interim = ''; progress = 0; hintLevel = 0; ends = 0; errors = []; hints = [];
-    startAt = performance.now(); firstAt = 0; lastAt = 0;
-    opts.promptEl.textContent = '';
+  function start(opts = {}) {
+    active = true;
+    muted = !!opts.muted;
+    hooks = opts;
+    startAt = now();
+    if (!muted) listenAt = startAt;
+    $('prompt').textContent = '';
     paint();
+    if (!API) { note(v, 'reconnaissance absente'); finish('reconnaissance absente'); return; }
     startRec();
     tick();
   }
-
-  function finish(why) {
+  function userTurn() {
     if (!active) return;
-    active = false;
-    clearTimeout(hintTimer);
-    try { rec && rec.stop(); } catch (e) { /* déjà arrêtée */ }
+    muted = false;
+    listenAt = now();
+    graceUntil = listenAt + GRACE_MS;
+    ignoreN = heardToks().length;
+    partnerText = join(heardToks());
+    note(v + ' ton tour', ignoreN ? `${ignoreN} mots entendus pendant le partenaire` : 'rien entendu pendant le partenaire');
     paint();
-    const dur = ((performance.now() - startAt) / 1000).toFixed(1);
-    results.push(`${opts.name} : ${progress}/${expected.length} mots suivis en ${dur} s (${why}) ; premier résultat ${firstAt ? Math.round(firstAt - startAt) + ' ms' : 'aucun'} ; arrêts de l’iPhone ${ends} ; erreurs ${errors.join(', ') || 'aucune'} ; souffles ${hints.length ? hints.join(' | ') : 'aucun'} ; entendu « ${(finals + ' ' + interim).replace(/\s+/g, ' ').trim()} »`);
-    note(opts.name + ' fin', why);
-    if (opts.onDone) opts.onDone();
   }
-
-  return { start, stop: () => finish('arrêt par toi'), paint, isActive: () => active };
+  // force : clore un essai arrêté avant que l'écoute ait commencé.
+  function finish(why, force) {
+    if (finished || (!active && !force)) return;
+    finished = true;
+    active = false;
+    clearTimeout(timer);
+    try { if (rec) rec.stop(); } catch (e) { /* déjà arrêtée */ }
+    paint();
+    const mine = userToks();
+    const r = {
+      v, n: store.results.filter((x) => x.v === v).length + 1,
+      where: standalone ? 'écran d’accueil' : 'Safari',
+      progress, total: EXPECTED.length, dur: fmt(now() - (listenAt || startAt)), why,
+      firstMs: firstAt ? Math.round(firstAt - listenAt) : null,
+      ends, errors: errors.slice(), hints: hints.slice(), extra: extra.slice(),
+      heard: join(mine), userWords: mine.length, partner: partnerText,
+    };
+    store.results.push(r);
+    save();
+    note(v + ' fin', why);
+    onDone(r);
+  }
+  return {
+    start, userTurn, finish,
+    stop: () => finish('arrêt par toi'),
+    addExtra: (s) => extra.push(s),
+    isActive: () => active,
+  };
 }
 
-// ---------- Test 1 ----------
-const sel = document.getElementById('lineSel');
-LINES.forEach((l, i) => sel.append(new Option(`Réplique ${i + 1} (${words(l).length} mots)`, i)));
-let s1 = null;
-function setupTest1() {
-  s1 = makeSession({
-    name: 'Test 1, réplique ' + (+sel.value + 1), text: LINES[+sel.value],
-    lineEl: document.getElementById('line1'), heardEl: document.getElementById('heard1'),
-    promptEl: document.getElementById('prompt1'), scoreEl: document.getElementById('score1'),
-    onDone: () => { go1.disabled = false; stop1.disabled = true; sel.disabled = false; },
-  });
-  s1.paint();
+// ---------- Voix du partenaire ----------
+function speakCue(v, done) {
+  if (!HAS_TTS) { note(v + ' partenaire', 'voix de synthèse absente'); done('absente'); return; }
+  const u = new SpeechSynthesisUtterance(SCENE.cue);
+  u.lang = 'fr-FR';
+  const voice = frVoices()[+$('voiceSel').value];
+  if (voice) { try { u.voice = voice; } catch (e) { /* voix refusée : voix par défaut */ } }
+  const asked = now();
+  let started = 0, over = false, w1 = null, w2 = null;
+  const end = (how) => { if (over) return; over = true; clearTimeout(w1); clearTimeout(w2); done(how); };
+  u.onstart = () => { started = now(); note(v + ' partenaire', `lecture commencée (${voice ? voice.name : 'voix par défaut'}), ${Math.round(started - asked)} ms après la demande`); };
+  u.onend = () => { note(v + ' partenaire', 'lecture finie en ' + fmt(now() - (started || asked))); end('lue'); };
+  u.onerror = (e) => { note(v + ' partenaire erreur', e.error); end('erreur ' + e.error); };
+  w1 = setTimeout(() => {
+    if (started) return;
+    note(v + ' partenaire', 'la voix n’a pas démarré en 5 s');
+    try { speechSynthesis.cancel(); } catch (e) { /* rien */ }
+    end('pas démarrée');
+  }, 5000);
+  w2 = setTimeout(() => { note(v + ' partenaire', 'fin de lecture jamais signalée, on continue'); end('fin non signalée'); }, 15000);
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
-const go1 = document.getElementById('go1');
-const stop1 = document.getElementById('stop1');
-sel.addEventListener('change', setupTest1);
-go1.addEventListener('click', () => { setupTest1(); go1.disabled = true; stop1.disabled = false; sel.disabled = true; s1.start(); });
-stop1.addEventListener('click', () => s1.stop());
-setupTest1();
 
-// ---------- Test 2 ----------
-document.getElementById('cue2').textContent = 'Le partenaire : « ' + SCENE.cue + ' »';
-const voiceSel = document.getElementById('voiceSel');
+// ---------- Déroulé d'un essai ----------
+let current = SEQ[store.ptr] || 'D';
+let run = null; // { v, s, timers, stopped, voiceEnd }
+const alive = (s) => run && run.s === s && !run.stopped;
+
+function setBusy(b) {
+  $('go').disabled = b;
+  $('stop').disabled = !b;
+  $('picker').querySelectorAll('button').forEach((x) => { x.disabled = b; });
+  $('voiceSel').disabled = b;
+}
+function startRun() {
+  const v = current;
+  const s = makeSession(v, onRunDone);
+  run = { v, s, timers: [], stopped: false, voiceEnd: 0 };
+  $('atoi').hidden = true;
+  setBusy(true);
+  idle();
+  note(v + ' lancée', VARIANTS[v].label);
+  if (v === 'D') {
+    phase('À toi : dis ta réplique');
+    s.start();
+  } else if (v === 'A') {
+    phase('Le partenaire parle…');
+    speakCue(v, (how) => {
+      if (!alive(s)) return;
+      s.addExtra('voix du partenaire : ' + how);
+      const tEnd = now();
+      phase('Attends…');
+      run.timers.push(setTimeout(() => {
+        if (!alive(s)) return;
+        s.addExtra('écoute lancée ' + fmt(now() - tEnd) + ' après la fin de la voix');
+        phase('À toi : dis ta réplique');
+        s.start();
+      }, WAIT_A_MS));
+    });
+  } else if (v === 'C') {
+    phase('Le partenaire parle…');
+    speakCue(v, (how) => {
+      if (!alive(s)) return;
+      s.addExtra('voix du partenaire : ' + how);
+      run.voiceEnd = now();
+      phase('Touche « À toi », puis dis ta réplique');
+      $('atoi').hidden = false;
+    });
+  } else if (v === 'B') {
+    phase('J’ouvre le micro…');
+    let spoken = false;
+    const partner = (why) => {
+      if (spoken || !alive(s) || !s.isActive()) return;
+      spoken = true;
+      if (why) note(v + ' partenaire', why);
+      phase('Le partenaire parle… (micro ouvert)');
+      speakCue(v, (how) => {
+        if (!alive(s)) return;
+        s.addExtra('voix du partenaire : ' + how);
+        phase('À toi : dis ta réplique');
+        s.userTurn();
+      });
+    };
+    s.start({
+      muted: true,
+      onListening: () => partner(),
+      onStarted: () => run.timers.push(setTimeout(() => partner('son pas signalé 3 s après le début de l’écoute, la voix part quand même'), 3000)),
+    });
+    run.timers.push(setTimeout(() => partner('écoute toujours pas démarrée après 15 s, la voix part quand même'), 15000));
+  }
+}
+function onRunDone(r) {
+  if (run) run.timers.forEach(clearTimeout);
+  $('atoi').hidden = true;
+  setBusy(false);
+  phase(`Fini : ${r.progress} mots sur ${r.total}` + (r.userWords ? '' : ' (ta voix n’a pas été entendue)'));
+  if (r.v === 'B' && !r.why.includes('avant ton tour')) {
+    $('ask').hidden = false;
+    $('ask').dataset.idx = store.results.length - 1;
+    $('go').disabled = true;
+    phase($('phase').textContent + '. Réponds à la question ci-dessous.');
+  }
+  const byYou = r.why.includes('par toi');
+  if (!byYou && SEQ[store.ptr] === r.v) store.ptr++;
+  if (!byYou && SEQ[store.ptr]) current = SEQ[store.ptr];
+  save();
+  renderPicker();
+  renderReport();
+}
+function stopRun() {
+  if (!run || run.stopped) return;
+  const { s } = run;
+  run.stopped = true;
+  run.timers.forEach(clearTimeout);
+  try { if (HAS_TTS) speechSynthesis.cancel(); } catch (e) { /* rien */ }
+  if (s.isActive()) s.stop();
+  else s.finish('arrêté par toi avant ton tour', true); // voix en cours, attente de A, « À toi » pas touché
+}
+
+// ---------- Choix de la variante ----------
+function renderPicker() {
+  const box = $('picker');
+  box.replaceChildren();
+  for (const k of 'ABCD') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'v' + k;
+    b.setAttribute('aria-pressed', String(k === current));
+    const rs = store.results.filter((r) => r.v === k);
+    const best = rs.length ? Math.max(...rs.map((r) => r.progress)) : null;
+    const key = document.createElement('span'); key.className = 'k'; key.textContent = k;
+    const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = VARIANTS[k].label;
+    const res = document.createElement('span');
+    res.className = 'res' + (best == null ? '' : best === EXPECTED.length ? ' yes' : best === 0 ? ' no' : '');
+    res.textContent = best == null ? '—' : `${best}/${EXPECTED.length}`;
+    b.append(key, lab, res);
+    b.addEventListener('click', () => { current = k; renderPicker(); idle(); });
+    b.disabled = !$('stop').disabled; // pas de changement pendant un essai
+    box.append(b);
+  }
+  $('desc').textContent = VARIANTS[current].desc;
+  $('voiceRow').hidden = current === 'D';
+  $('next').textContent = store.ptr < SEQ.length
+    ? `Ordre conseillé : D, A, B, C, puis D. Étape ${store.ptr + 1} sur ${SEQ.length}.`
+    : 'Série finie : copie le rapport (tu peux refaire une variante en la touchant).';
+}
+function idle() {
+  paintLine(0, false);
+  paintHeard([], []);
+  $('prompt').textContent = '';
+  $('score').textContent = '';
+  phase('');
+}
+
+// ---------- Mise en route ----------
+$('cue').textContent = 'Le partenaire : « ' + SCENE.cue + ' »';
+const voiceSel = $('voiceSel');
 function fillVoices() {
+  const keep = voiceSel.value;
   const fr = frVoices();
-  voiceSel.replaceChildren(...(fr.length ? fr.map((v, i) => new Option(v.name + ' (' + v.lang + ')', i)) : [new Option('Voix par défaut', -1)]));
+  voiceSel.replaceChildren(...(fr.length ? fr.map((x, i) => new Option(x.name + ' (' + x.lang + ')', i)) : [new Option('Voix par défaut', -1)]));
+  if (keep && [...voiceSel.options].some((o) => o.value === keep)) voiceSel.value = keep;
   renderStatus();
   renderReport();
 }
-if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', fillVoices);
+if (HAS_TTS) speechSynthesis.addEventListener('voiceschanged', fillVoices);
 fillVoices();
-const go2 = document.getElementById('go2');
-const stop2 = document.getElementById('stop2');
-const s2 = makeSession({
-  name: 'Test 2, scène', text: SCENE.line,
-  lineEl: document.getElementById('line2'), heardEl: document.getElementById('heard2'),
-  promptEl: document.getElementById('prompt2'), scoreEl: document.getElementById('score2'),
-  onDone: () => { go2.disabled = false; stop2.disabled = true; },
+$('go').addEventListener('click', startRun);
+$('stop').addEventListener('click', stopRun);
+$('atoi').addEventListener('click', () => {
+  if (!run || run.stopped) return;
+  $('atoi').hidden = true;
+  run.s.addExtra('toucher « À toi » ' + fmt(now() - run.voiceEnd) + ' après la fin de la voix');
+  phase('À toi : dis ta réplique');
+  run.s.start();
 });
-s2.paint();
-go2.addEventListener('click', () => {
-  go2.disabled = true; stop2.disabled = false;
-  if (!('speechSynthesis' in window)) { note('Test 2', 'voix de synthèse absente'); s2.start(); return; }
-  const u = new SpeechSynthesisUtterance(SCENE.cue);
-  u.lang = 'fr-FR';
-  const v = frVoices()[+voiceSel.value];
-  try { if (v) u.voice = v; } catch (e) { note('Test 2 partenaire', 'voix choisie refusée, voix par défaut'); }
-  u.onstart = () => note('Test 2 partenaire', 'lecture commencée');
-  u.onerror = (e) => { note('Test 2 partenaire erreur', e.error); s2.start(); };
-  u.onend = () => { note('Test 2 partenaire', 'lecture finie, écoute lancée sans geste'); s2.start(); };
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-});
-stop2.addEventListener('click', () => { speechSynthesis && speechSynthesis.cancel(); s2.isActive() ? s2.stop() : (go2.disabled = false, stop2.disabled = true); });
-
-// ---------- Rapport ----------
-document.getElementById('copy').addEventListener('click', async () => {
+$('ask').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+  const r = store.results[+$('ask').dataset.idx];
+  if (r) { r.route = b.dataset.route; note('B son de la voix, selon toi', r.route); }
+  $('ask').hidden = true;
+  $('go').disabled = false;
+  save();
+  renderReport();
+}));
+$('copy').addEventListener('click', async () => {
   const txt = report();
-  const out = document.getElementById('copied');
+  const out = $('copied');
   try { await navigator.clipboard.writeText(txt); out.textContent = 'Rapport copié : colle-le dans la conversation.'; }
   catch (e) {
-    const r = document.createRange(); r.selectNodeContents(document.getElementById('report'));
-    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    const r = document.createRange(); r.selectNodeContents($('report'));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
     out.textContent = 'Copie automatique refusée : le rapport est sélectionné, touche « Copier ».';
   }
 });
-document.getElementById('clear').addEventListener('click', () => { log.length = 0; results.length = 0; renderReport(); });
+$('clear').addEventListener('click', () => {
+  store = fresh();
+  save();
+  current = SEQ[0];
+  $('ask').hidden = true;
+  if ($('stop').disabled) $('go').disabled = false;
+  $('copied').textContent = '';
+  renderPicker();
+  idle();
+  note('Rapport effacé');
+});
 
 renderStatus();
-note('Page ouverte', standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur');
+renderPicker();
+idle();
+note(store.log.length ? 'Page rouverte' : 'Page ouverte', (standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur') + ', à ' + new Date().toLocaleTimeString('fr-FR'));
 </script>
 </body>
 </html>
