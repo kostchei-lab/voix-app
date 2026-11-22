@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Test souffleur v2</title>
-<meta name="description" content="Test v2 sur iPhone : enchaîner la réplique du partenaire (voix de synthèse) et l'écoute de ta réplique, quatre variantes.">
+<title>Test souffleur v3</title>
+<meta name="description" content="Test v3 sur iPhone : enchaîner une scène entière sans toucher l'écran, six variantes.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,7 @@ p { margin: 6px 0; }
 .status dt { color: var(--muted); }
 .status dd { margin: 0; font-weight: 600; }
 .yes { color: var(--ok); } .no { color: var(--bad); }
-.picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+.picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
 .picker button { border-radius: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.2; min-width: 0; }
 .picker .k { font-size: 22px; font-weight: 700; }
 .picker .lab { font-size: 12px; font-weight: 500; color: var(--muted); text-align: center; }
@@ -41,7 +41,8 @@ p { margin: 6px 0; }
 .picker button[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--soft); padding: 7px 3px; }
 .desc { font-size: 15px; }
 .phase { font-size: 21px; font-weight: 700; min-height: 1.5em; margin-top: 10px; }
-.cue { font-style: italic; color: var(--muted); margin-top: 10px; }
+.cue { font-style: italic; color: var(--muted); margin-top: 10px; min-height: 1.45em; }
+.cue.now { color: var(--ink); font-weight: 600; }
 .line { font-size: 19px; line-height: 1.55; padding: 10px 12px; border-radius: 10px; background: var(--soft); margin: 8px 0; }
 .line .w { border-radius: 4px; padding: 0 1px; }
 .line .w.done { color: var(--ok); }
@@ -52,10 +53,9 @@ p { margin: 6px 0; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 button { appearance: none; font: inherit; font-weight: 600; border-radius: 999px; padding: 11px 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
 button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-button.big { display: block; width: 100%; margin: 10px 0; font-size: 26px; padding: 20px; background: var(--accent); color: var(--bg); border-color: var(--accent); border-radius: 16px; }
 button:disabled { opacity: .45; }
-select { font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); max-width: 100%; }
 label { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; font-size: 15px; }
+select { font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); max-width: 100%; }
 .score { font-weight: 700; }
 .ask { border: 2px solid var(--accent); border-radius: 12px; padding: 10px 12px; margin-top: 12px; }
 .ask .row button { flex: 1 1 100%; text-align: left; border-radius: 12px; }
@@ -67,16 +67,18 @@ ol.steps li { margin: 4px 0; }
 </head>
 <body>
 <main>
-  <h1>Test souffleur v2 : enchaîner</h1>
-  <p class="lead">Au premier test, l’iPhone suivait bien ta réplique, mais n’entendait plus rien quand la voix du partenaire venait de parler. Ce test compare quatre façons d’enchaîner, pour garder celle qui marche.</p>
+  <h1>Test souffleur v3 : sans toucher</h1>
+  <p class="lead">Au test v2, l’iPhone n’entendait plus rien après la voix de synthèse, sauf si tu touchais l’écran. Ce test cherche une façon d’enchaîner toute une scène sans toucher : un seul « Lancer », puis deux répliques du partenaire et deux à toi.</p>
   <div class="card">
-    <h2>Mode d’emploi (≈ 15 min)</h2>
+    <h2>Mode d’emploi (≈ 10 min)</h2>
     <ol class="steps">
-      <li>Dans Safari, touche « Lancer » cinq fois : la page passe seule aux variantes D, A, B, C, puis D encore. Dis ta réplique à chaque fois, d’une voix normale.</li>
-      <li>Après B, réponds à la question sur le son.</li>
+      <li>Coupe le mode silencieux de l’iPhone et monte un peu le son.</li>
+      <li>Ouvre la page depuis l’icône « Test souffleur » de l’écran d’accueil (à défaut, dans Safari).</li>
+      <li>Touche « Lancer », puis <strong>ne touche plus l’écran</strong> jusqu’à « Fini » : dis tes deux répliques quand c’est ton tour, d’une voix normale. Si rien ne bouge, attends : l’essai passe seul à la suite après 10 s.</li>
+      <li>Après chaque essai avec une voix, réponds à la question sur le son. La page passe seule à la variante suivante : T, F, M, O, S, G.</li>
       <li>Touche « Copier le rapport » et colle-le dans la conversation.</li>
-      <li>Ajoute la page à l’écran d’accueil (Partager → Sur l’écran d’accueil), ouvre-la depuis l’icône, refais la série et copie ce second rapport.</li>
     </ol>
+    <p class="small">La voix du partenaire est volontairement provisoire (robotique) : elle sert seulement à savoir si le micro tient. La vraie voix viendra ensuite.</p>
     <dl class="status" id="status"></dl>
   </div>
 
@@ -90,12 +92,11 @@ ol.steps li { margin: 4px 0; }
       <button id="stop" disabled>Arrêter</button>
     </div>
     <div class="phase" id="phase" aria-live="polite"></div>
-    <button class="big" id="atoi" hidden>À toi</button>
     <div class="ask" id="ask" hidden>
-      <p><strong>Question sur B :</strong> pendant B, la voix du partenaire sortait…</p>
+      <p><strong>Question :</strong> pendant l’essai <span id="askV"></span>, la voix du partenaire, tu l’as entendue…</p>
       <div class="row">
-        <button data-route="fort, par le haut-parleur (en bas)">Fort, par le haut-parleur (en bas)</button>
-        <button data-route="faiblement, par l’écouteur (en haut)">Faiblement, par l’écouteur (en haut)</button>
+        <button data-route="fort, par le haut-parleur">Fort, par le haut-parleur</button>
+        <button data-route="faiblement">Faiblement</button>
         <button data-route="pas entendue">Je ne l’ai pas entendue</button>
       </div>
     </div>
@@ -104,7 +105,7 @@ ol.steps li { margin: 4px 0; }
     <div class="prompt" id="prompt" aria-live="polite"></div>
     <div class="heard" id="heard" aria-live="polite"></div>
     <p class="score" id="score"></p>
-    <label id="voiceRow">Voix du partenaire
+    <label id="voiceRow">Voix de synthèse
       <select id="voiceSel"></select>
     </label>
   </section>
@@ -124,21 +125,32 @@ ol.steps li { margin: 4px 0; }
 <script>
 'use strict';
 // ---------- Réglages du test (répliques écrites pour le test, sans droits) ----------
-const SCENE = {
-  cue: 'Alors, qu’avez-vous à me dire ?',
-  line: 'Je ne suis pas venu ici pour me taire, mais pour vous dire enfin ce que je pense.',
-};
-const STALL_MS = 2500;   // silence avant la première lettre soufflée
+const PARTNER = ['Alors, qu’avez-vous à me dire ?', 'Eh bien ? Parlez donc !'];
+const LINES = [
+  'Je ne suis pas venu ici pour me taire, mais pour vous dire enfin ce que je pense.',
+  'Vous m’avez trompé, et tout le monde le savait, sauf moi.',
+];
+const STALL_MS = 2500;   // silence avant la première lettre soufflée (compté depuis l'ouverture réelle du micro)
 const STEP_MS = 2000;    // puis une lettre de plus toutes les 2 s
-const WAIT_A_MS = 1000;  // variante A : attente entre la fin de la voix et l'écoute
-const GRACE_MS = 700;    // variante B : ce qui arrive juste après la voix est encore attribué au partenaire
-const DEAF_MS = 20000;   // un essai s'arrête si rien n'est entendu pendant 20 s à ton tour
-const SEQ = ['D', 'A', 'B', 'C', 'D'];
+const AFTER_MS = 400;    // attente entre la fin de la voix du partenaire et l'écoute
+const TEXT_MS = 2000;    // variante T : temps de lecture de la réplique du partenaire
+const GRACE_MS = 700;    // micro ouvert : ce qui arrive juste après la voix est encore attribué au partenaire
+const DEAF_MS = 10000;   // une réplique est abandonnée si rien n'est entendu pendant 10 s
+const SEQ = ['T', 'F', 'M', 'O', 'S', 'G'];
+const PLAY_REC = 'play-and-record';
 const VARIANTS = {
-  A: { label: 'Voix + 1 s', desc: 'A. La voix lit la réplique du partenaire. Une seconde après, l’écoute démarre seule : dis ta réplique.' },
-  B: { label: 'Micro avant', desc: 'B. L’écoute démarre dès ton toucher, puis la voix lit la réplique du partenaire, micro ouvert. Dis ensuite ta réplique. Repère d’où sort la voix : haut-parleur ou écouteur du haut.' },
-  C: { label: 'Bouton', desc: 'C. La voix lit la réplique du partenaire, puis un grand bouton « À toi » apparaît : touche-le, puis dis ta réplique.' },
-  D: { label: 'Texte seul', desc: 'D. Sans voix : lis la réplique du partenaire à l’écran, puis dis ta réplique. C’est le témoin : il a marché au premier test.' },
+  T: { label: 'Texte seul', voice: 'texte', mode: 'auto',
+    desc: 'T. Témoin, sans voix. Tu touches « Lancer » et dis ta première réplique. La réplique suivante du partenaire s’affiche, puis l’écoute repart seule : dis ta seconde réplique sans toucher.' },
+  F: { label: 'Fichier son', voice: 'fichier', mode: 'auto',
+    desc: 'F. La voix du partenaire est un fichier son. L’écoute repart seule après chacune de ses répliques. Ne touche plus rien après « Lancer ».' },
+  M: { label: 'Fichier + réglage', voice: 'fichier', mode: PLAY_REC,
+    desc: 'M. Comme F, avec le réglage de Safari « lecture et micro » (celui des appels vidéo).' },
+  O: { label: 'Micro ouvert', voice: 'fichier', mode: PLAY_REC, open: true,
+    desc: 'O. L’écoute s’ouvre une seule fois, au toucher, et reste ouverte toute la scène. La voix du partenaire (fichier son) passe pendant ce temps ; ce que le micro en capte est écarté.' },
+  S: { label: 'Synthèse + réglage', voice: 'synthèse', mode: PLAY_REC,
+    desc: 'S. La voix de synthèse de l’iPhone, avec le réglage « lecture et micro ». L’écoute repart seule après chaque réplique du partenaire.' },
+  G: { label: 'Fichier + micro tenu', voice: 'fichier', mode: 'auto', hold: true,
+    desc: 'G. Comme F, mais la page garde en plus le micro ouvert toute la scène. Si Safari demande l’accès au micro, accepte.' },
 };
 
 // ---------- Mots : découpe et comparaison ----------
@@ -182,12 +194,12 @@ function follow(expected, heard) {
   }
   return i;
 }
-const SHOWN = displayWords(SCENE.line);
-const EXPECTED = SHOWN.map(norm);
-const CUE_WORDS = new Set(words(SCENE.cue));
+const SHOWN = LINES.map(displayWords);
+const EXPECTED = SHOWN.map((s) => s.map(norm));
+const CUE_WORDS = PARTNER.map((p) => new Set(words(p)));
 
 // ---------- Mémoire du rapport (sur l'iPhone seulement) ----------
-const KEY = 'souffleur-test-v2';
+const KEY = 'souffleur-test-v3';
 function fresh() { return { log: [], results: [], ptr: 0 }; }
 let store = fresh();
 try {
@@ -196,55 +208,78 @@ try {
 } catch (e) { /* mémoire indisponible : le rapport vit le temps de la page */ }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* idem */ } }
 
-// ---------- Journal et rapport ----------
+// ---------- Journal ----------
 const $ = (id) => document.getElementById(id);
 const now = () => performance.now();
 const t0 = now();
 const fmt = (ms) => (ms / 1000).toFixed(1).replace('.', ',') + ' s';
 function note(kind, detail = '') {
   store.log.push(`${fmt(now() - t0)}  ${kind}${detail ? ' : ' + detail : ''}`);
-  if (store.log.length > 800) store.log.splice(0, store.log.length - 800);
+  if (store.log.length > 1200) store.log.splice(0, store.log.length - 1200);
   save();
   renderReport();
 }
 const API = window.SpeechRecognition || window.webkitSpeechRecognition;
 const HAS_TTS = 'speechSynthesis' in window;
+const HAS_SESSION = 'audioSession' in navigator;
+const AC = window.AudioContext || window.webkitAudioContext;
 const standalone = !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches));
 function frVoices() { return HAS_TTS ? speechSynthesis.getVoices().filter((v) => /^fr/i.test(v.lang)) : []; }
+// Geste récent : Safari considère-t-il qu'un toucher vient d'avoir lieu ?
+function gesture() { return navigator.userActivation ? (navigator.userActivation.isActive ? 'oui' : 'non') : 'inconnu'; }
+function sessionInfo() {
+  if (!HAS_SESSION) return 'réglage absent';
+  try { return `${navigator.audioSession.type}, ${navigator.audioSession.state}`; } catch (e) { return 'illisible'; }
+}
+function setMode(type) {
+  if (!HAS_SESSION) return 'absent';
+  try { navigator.audioSession.type = type; } catch (e) { note('réglage son refusé', e.message); }
+  try { return navigator.audioSession.type; } catch (e) { return '?'; }
+}
+
+// ---------- Rapport ----------
+function turnText(t) {
+  const parts = [`réplique ${t.k} : ${t.progress}/${t.total} (${t.how}, ${t.why})`];
+  if (t.gesture) parts.push('geste récent ' + t.gesture);
+  parts.push('micro prêt ' + (t.micMs != null ? `en ${fmt(t.micMs)}` : t.how === 'micro déjà ouvert' ? 'avant' : 'jamais'));
+  parts.push('premier mot ' + (t.firstMs != null ? `${t.firstMs} ms après l’ouverture` : 'aucun'));
+  if (t.level != null) parts.push(`niveau du micro tenu ${t.level} dB`);
+  if (t.partner) parts.push(`écarté (partenaire) « ${t.partner} »`);
+  parts.push(`souffles ${t.hints.length ? t.hints.join(' | ') : 'aucun'}`);
+  parts.push(`entendu « ${t.heard} »`);
+  return parts.join(', ');
+}
 function resultLine(r) {
-  const parts = [
-    `${r.v}, essai ${r.n} (${r.where}) : ${r.progress}/${r.total} mots suivis en ${r.dur} (${r.why})`,
-    'premier mot entendu à ton tour : ' + (r.firstMs != null ? r.firstMs + ' ms après son début' : 'aucun'),
-    ...r.extra,
-  ];
-  if (r.partner != null) parts.push(`entendu pendant le partenaire « ${r.partner} »`);
-  if (r.v === 'B') parts.push('son de la voix, selon toi : ' + (r.route || 'pas répondu'));
-  parts.push(
-    `arrêts de l’iPhone ${r.ends}`,
-    `erreurs ${r.errors.join(', ') || 'aucune'}`,
-    `souffles ${r.hints.length ? r.hints.join(' | ') : 'aucun'}`,
-    `entendu à ton tour « ${r.heard} »`,
-  );
+  const parts = [`${r.v}, essai ${r.n} (${r.where}, réglage ${r.mode}) : ${r.why}`];
+  r.turns.forEach((t) => parts.push(turnText(t)));
+  if (r.voice.length) parts.push('partenaire : ' + r.voice.join(' / '));
+  if (r.extra.length) parts.push(...r.extra);
+  if (VARIANTS[r.v].voice !== 'texte') parts.push('son, selon toi : ' + (r.route || 'pas répondu'));
+  parts.push(`arrêts de l’écoute par l’iPhone ${r.ends}`, `erreurs ${r.errors.join(', ') || 'aucune'}`);
   return parts.join(' ; ');
 }
 function synthesis() {
-  return 'ABCD'.split('').map((k) => {
+  return SEQ.map((k) => {
     const rs = store.results.filter((r) => r.v === k);
-    if (!rs.length) return `${k} (${VARIANTS[k].label}) : pas fait`;
-    const best = Math.max(...rs.map((r) => r.progress));
-    const heard = rs.filter((r) => r.userWords > 0).length;
-    return `${k} (${VARIANTS[k].label}) : ${rs.length} essai${rs.length > 1 ? 's' : ''}, meilleur ${best}/${EXPECTED.length} ; ta voix entendue ${heard} fois sur ${rs.length}`;
+    const lab = `${k} (${VARIANTS[k].label})`;
+    if (!rs.length) return `${lab} : pas fait`;
+    const best = [0, 1].map((i) => Math.max(0, ...rs.map((r) => (r.turns[i] ? r.turns[i].progress : 0))));
+    const free = rs.flatMap((r) => r.turns).filter((t) => t.how !== 'au toucher');
+    const heard = free.filter((t) => t.userWords > 0).length;
+    return `${lab} : ${rs.length} essai${rs.length > 1 ? 's' : ''} ; meilleur ${best[0]}/${EXPECTED[0].length} puis ${best[1]}/${EXPECTED[1].length} ; ta voix entendue sans toucher ${heard} fois sur ${free.length}`;
   });
 }
 function report() {
   return [
-    'TEST SOUFFLEUR v2 (enchaînement) — rapport',
+    'TEST SOUFFLEUR v3 (sans toucher) — rapport',
     'Date : ' + new Date().toLocaleString('fr-FR'),
     'Navigateur : ' + navigator.userAgent,
     'Ouverte depuis l’écran d’accueil : ' + (standalone ? 'oui' : 'non'),
     'Reconnaissance : ' + (window.SpeechRecognition ? 'SpeechRecognition' : window.webkitSpeechRecognition ? 'webkitSpeechRecognition' : 'absente'),
+    'Réglage « lecture et micro » (audioSession) : ' + (HAS_SESSION ? 'présent' : 'absent'),
+    'Détection du geste récent (userActivation) : ' + (navigator.userActivation ? 'présente' : 'absente'),
     'Voix de synthèse françaises : ' + (frVoices().map((v) => v.name + (v.localService ? '' : ' (en ligne)')).join(', ') || 'aucune'),
-    'Ordre conseillé : D, A, B, C, puis D',
+    'Ordre conseillé : ' + SEQ.join(', '),
     '',
     'Synthèse :',
     ...synthesis(),
@@ -267,17 +302,18 @@ function renderStatus() {
   };
   add('Reconnaissance', API ? 'disponible' : 'absente de ce navigateur', !!API);
   add('Ouverte depuis', standalone ? 'l’écran d’accueil' : 'Safari (ou autre navigateur)');
+  add('Réglage « lecture et micro »', HAS_SESSION ? 'disponible' : 'absent', HAS_SESSION);
   const fr = frVoices();
   add('Voix françaises', fr.length ? fr.length + ' voix' : 'aucune pour l’instant', fr.length > 0);
 }
 
 // ---------- Affichage de la scène ----------
-function paintLine(progress, active) {
+function paintLine(k, progress, active) {
   const el = $('line');
   el.replaceChildren();
-  SHOWN.forEach((w, k) => {
+  SHOWN[k].forEach((w, i) => {
     const s = document.createElement('span');
-    s.className = 'w' + (k < progress ? ' done' : k === progress && active ? ' next' : '');
+    s.className = 'w' + (i < progress ? ' done' : i === progress && active ? ' next' : '');
     s.textContent = w;
     el.append(s, document.createTextNode(/[’'\-]$/.test(w) ? '' : ' '));
   });
@@ -293,187 +329,265 @@ function paintHeard(partnerToks, userToks) {
   }
   el.append(document.createTextNode(join(userToks)));
 }
+function showCue(k, speaking) {
+  $('cue').textContent = 'Le partenaire : « ' + PARTNER[k] + ' »';
+  $('cue').classList.toggle('now', !!speaking);
+}
 function phase(t) { $('phase').textContent = t; }
 
-// ---------- Une séance d'écoute ----------
-// muted : le micro est ouvert mais c'est encore le partenaire qui parle (variante B).
-function makeSession(v, onDone) {
-  let rec = null, active = false, muted = false, base = '', finals = '', interim = '';
-  let ignoreN = 0, graceUntil = 0, startAt = now(), listenAt = 0, firstAt = 0, lastAt = 0;
-  let ends = 0, progress = 0, hintLevel = 0, timer = null, partnerText = null, finished = false;
-  let hooks = {}, listening = false;
-  const errors = [], hints = [], extra = [];
-
-  const heardToks = () => tokens(finals + ' ' + interim);
-  // Mots de ton tour : après ceux du partenaire ; on écarte aussi un reste de sa réplique en tête.
-  function userToks() {
-    const rest = heardToks().slice(ignoreN);
-    if (partnerText != null) {
-      while (rest.length && CUE_WORDS.has(norm(rest[0])) && !same(norm(rest[0]), EXPECTED[0])) rest.shift();
-    }
-    return rest;
-  }
-  function paint() {
-    paintLine(progress, active && !muted);
-    paintHeard(heardToks().slice(0, ignoreN), userToks());
-    $('score').textContent = `${progress} mots sur ${EXPECTED.length} suivis`;
-  }
-  function signalListening() {
-    if (listening) return;
-    listening = true;
-    if (hooks.onListening) hooks.onListening();
-  }
-  function onResults(fin, mid) {
-    finals = base + fin;
-    interim = mid;
-    const t = now();
-    if (muted || t < graceUntil) {
-      ignoreN = heardToks().length;
-      partnerText = join(heardToks());
-      paint();
-      return;
-    }
-    const mine = userToks();
-    if (!mine.length) { paint(); return; }
-    if (!firstAt) { firstAt = t; note(v + ' premier mot entendu', `${Math.round(t - listenAt)} ms après le début de ton tour`); }
-    lastAt = t;
-    const p = follow(EXPECTED, mine.map(norm));
-    if (p > progress) { progress = p; hintLevel = 0; $('prompt').textContent = ''; }
-    paint();
-    if (progress >= EXPECTED.length) finish('réplique complète');
-  }
-  function tick() {
-    if (!active) return;
-    if (!muted) {
-      const t = now();
-      const idle = t - Math.max(lastAt, listenAt);
-      if (progress < EXPECTED.length && idle > STALL_MS + hintLevel * STEP_MS && (lastAt || idle > STALL_MS + 1500)) {
-        hintLevel++;
-        const target = SHOWN[progress].replace(/[\s.,:;!?«»]/g, '');
-        const k = Math.min(hintLevel, target.length);
-        const txt = k >= target.length ? target : target.slice(0, k) + '…';
-        $('prompt').textContent = 'Souffleur : « ' + txt + ' »';
-        hints.push(`${txt} (après ${fmt(idle)}${lastAt ? '' : ', aucun mot entendu avant'})`);
-        note(v + ' souffle', txt);
-      }
-      if (!firstAt && t - listenAt > DEAF_MS) { finish(`rien entendu pendant ${DEAF_MS / 1000} s`); return; }
-    }
-    timer = setTimeout(tick, 250);
-  }
+// ---------- L'écoute (une reconnaissance, relancée si l'iPhone la coupe) ----------
+function makeListener(run, tag) {
+  const L = { base: '', finals: '', interim: '', startAt: now(), audioAt: 0, ends: 0, active: true,
+    stopping: false, onChange: null, onAudio: null, onDead: null, closed: null, gesture: gesture() };
+  let rec = null;
+  L.toks = () => tokens(L.base + ' ' + L.finals + ' ' + L.interim);
   function startRec() {
     rec = new API();
     rec.lang = 'fr-FR';
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 1;
-    rec.onstart = () => {
-      note(v + ' écoute démarrée', 'voix de synthèse ' + (HAS_TTS && speechSynthesis.speaking ? 'en train de parler' : 'silencieuse'));
-      if (hooks.onStarted) hooks.onStarted();
+    rec.onstart = () => note(tag + ' écoute démarrée', 'voix de synthèse ' + (HAS_TTS && speechSynthesis.speaking ? 'en train de parler' : 'silencieuse') + ', réglage ' + sessionInfo());
+    rec.onaudiostart = () => {
+      if (!L.audioAt) { L.audioAt = now(); note(tag + ' son capté', fmt(L.audioAt - L.startAt) + ' après la demande'); }
+      else note(tag + ' son capté', 'après relance');
+      if (L.onAudio) L.onAudio();
     };
-    rec.onaudiostart = () => { note(v + ' son capté'); signalListening(); };
-    rec.onspeechstart = () => note(v + ' parole détectée', muted ? 'pendant le partenaire' : 'à ton tour');
-    rec.onspeechend = () => note(v + ' fin de parole détectée');
+    rec.onspeechstart = () => note(tag + ' parole détectée');
     rec.onresult = (e) => {
       let fin = '', mid = '';
       for (let r = 0; r < e.results.length; r++) {
         const t = e.results[r][0].transcript;
         if (e.results[r].isFinal) fin += t + ' '; else mid += t + ' ';
       }
-      onResults(fin, mid);
+      L.finals = fin;
+      L.interim = mid;
+      if (L.onChange) L.onChange();
     };
-    rec.onerror = (e) => { errors.push(e.error); note(v + ' erreur', e.error + (e.message ? ' — ' + e.message : '')); };
+    rec.onerror = (e) => { run.errors.push(e.error); note(tag + ' erreur', e.error + (e.message ? ' — ' + e.message : '')); };
     rec.onend = () => {
-      ends++;
-      note(v + ' écoute terminée par l’iPhone', 'arrêt n° ' + ends);
-      if (active && ends < 8 && !errors.includes('not-allowed') && !errors.includes('service-not-allowed')) {
+      L.ends++;
+      if (L.stopping) { note(tag + ' écoute fermée'); if (L.closed) L.closed(); return; }
+      run.ends++;
+      note(tag + ' écoute terminée par l’iPhone', 'arrêt n° ' + L.ends);
+      const fatal = run.errors.includes('not-allowed') || run.errors.includes('service-not-allowed');
+      if (L.active && L.ends < 8 && !fatal) {
         // Après une relance, les résultats repartent de zéro : on garde ce qui était acquis.
-        base = finals + ' ' + interim;
-        interim = '';
-        try { startRec(); note(v + ' relance'); } catch (err) { note(v + ' relance impossible', err.message); finish('relance impossible'); }
-      } else if (active) finish('arrêt de l’écoute');
+        L.base += ' ' + L.finals + ' ' + L.interim;
+        L.finals = L.interim = '';
+        try { startRec(); note(tag + ' relance', 'geste récent ' + gesture()); }
+        catch (err) { note(tag + ' relance impossible', err.message); dead('relance impossible'); }
+      } else if (L.active) dead('arrêt de l’écoute');
     };
-    try { rec.start(); } catch (err) { note(v + ' démarrage impossible', err.message); finish('démarrage impossible'); }
+    rec.start();
   }
-  function start(opts = {}) {
-    active = true;
-    muted = !!opts.muted;
-    hooks = opts;
-    startAt = now();
-    if (!muted) listenAt = startAt;
+  function dead(why) { L.active = false; if (L.onDead) L.onDead(why); }
+  L.stop = () => new Promise((res) => {
+    if (!L.active) { res(); return; }
+    L.active = false;
+    L.stopping = true;
+    L.closed = res;
+    try { rec.stop(); } catch (e) { res(); }
+    setTimeout(res, 1500);
+  });
+  L.abort = () => { L.active = false; L.stopping = true; try { if (rec) rec.abort(); } catch (e) { /* déjà fermée */ } };
+  note(tag + ' écoute demandée', 'geste récent ' + L.gesture);
+  if (!API) { L.active = false; note(tag, 'reconnaissance absente'); return L; }
+  try { startRec(); } catch (err) { L.active = false; note(tag + ' démarrage impossible', err.message); }
+  return L;
+}
+
+// ---------- Une réplique à toi ----------
+// how : « au toucher », « sans toucher » ou « micro déjà ouvert » (variante O).
+function doTurn(run, k, L, how) {
+  return new Promise((resolve) => {
+    const tag = run.v + (k + 1);
+    const EXP = EXPECTED[k];
+    const turnAt = now();
+    const graceUntil = how === 'micro déjà ouvert' ? turnAt + GRACE_MS : 0;
+    const from = L.mark || 0; // jetons des répliques précédentes (variante O)
+    let offset = L.toks().length;
+    let listenAt = L.audioAt ? Math.max(L.audioAt, turnAt) : 0;
+    let lastAt = 0, firstAt = 0, hintLevel = 0, progress = 0, over = false, timer = null;
+    const hints = [];
+    run.level = -Infinity;
+    const t = { k: k + 1, how, total: EXP.length, progress: 0, hints, firstMs: null, micMs: null,
+      gesture: how === 'micro déjà ouvert' ? '' : L.gesture, userWords: 0, heard: '', partner: '', why: '' };
+    run.turn = { finish };
+    paintLine(k, 0, true);
     $('prompt').textContent = '';
-    paint();
-    if (!API) { note(v, 'reconnaissance absente'); finish('reconnaissance absente'); return; }
-    startRec();
+    note(tag + ' ton tour', how);
+
+    function mine() {
+      const rest = L.toks().slice(offset);
+      while (rest.length && CUE_WORDS[k].has(norm(rest[0])) && !same(norm(rest[0]), EXP[0])) rest.shift();
+      return rest;
+    }
+    function paint() {
+      paintLine(k, progress, !over);
+      paintHeard(L.toks().slice(from, offset), mine());
+      $('score').textContent = `Réplique ${k + 1} : ${progress} mots sur ${EXP.length} suivis`;
+    }
+    function update() {
+      if (over) return;
+      const tt = now();
+      if (tt < graceUntil) { offset = L.toks().length; paint(); return; }
+      const m = mine();
+      if (!m.length) { paint(); return; }
+      if (!firstAt) { firstAt = tt; note(tag + ' premier mot entendu', `${Math.round(tt - (listenAt || turnAt))} ms après l’ouverture`); }
+      lastAt = tt;
+      const p = follow(EXP, m.map(norm));
+      if (p > progress) { progress = p; hintLevel = 0; $('prompt').textContent = ''; }
+      paint();
+      if (progress >= EXP.length) finish('complète');
+    }
+    function tick() {
+      if (over) return;
+      const tt = now();
+      if (!listenAt && L.audioAt) listenAt = Math.max(L.audioAt, turnAt);
+      if (listenAt) {
+        const idle = tt - Math.max(lastAt, listenAt);
+        if (progress < EXP.length && idle > STALL_MS + hintLevel * STEP_MS && (lastAt || idle > STALL_MS + 1500)) {
+          hintLevel++;
+          const target = SHOWN[k][progress].replace(/[\s.,:;!?«»]/g, '');
+          const n = Math.min(hintLevel, target.length);
+          const txt = n >= target.length ? target : target.slice(0, n) + '…';
+          $('prompt').textContent = 'Souffleur : « ' + txt + ' »';
+          hints.push(`${txt} (après ${fmt(idle)}${lastAt ? '' : ', aucun mot avant'})`);
+          note(tag + ' souffle', txt);
+        }
+      }
+      if (!firstAt && tt - (listenAt || turnAt) > DEAF_MS) { finish(`rien entendu en ${DEAF_MS / 1000} s`); return; }
+      timer = setTimeout(tick, 250);
+    }
+    function finish(why) {
+      if (over) return;
+      over = true;
+      clearTimeout(timer);
+      L.onChange = L.onDead = null;
+      run.turn = null;
+      const m = mine();
+      L.mark = L.toks().length;
+      Object.assign(t, {
+        progress, why, userWords: m.length, heard: join(m), partner: join(L.toks().slice(from, offset)),
+        firstMs: firstAt ? Math.round(firstAt - (listenAt || turnAt)) : null,
+        micMs: how === 'micro déjà ouvert' ? null : L.audioAt ? Math.round(L.audioAt - L.startAt) : null,
+        level: run.hold ? (Number.isFinite(run.level) ? Math.round(run.level) : -99) : null,
+      });
+      paint();
+      $('prompt').textContent = '';
+      note(tag + ' fin de réplique', `${progress}/${EXP.length}, ${why}`);
+      run.turns.push(t);
+      resolve(t);
+    }
+    L.onChange = update;
+    L.onDead = (why) => finish(why);
+    if (!L.active && !L.stopping) { finish('écoute impossible'); return; }
+    update();
     tick();
-  }
-  function userTurn() {
-    if (!active) return;
-    muted = false;
-    listenAt = now();
-    graceUntil = listenAt + GRACE_MS;
-    ignoreN = heardToks().length;
-    partnerText = join(heardToks());
-    note(v + ' ton tour', ignoreN ? `${ignoreN} mots entendus pendant le partenaire` : 'rien entendu pendant le partenaire');
-    paint();
-  }
-  // force : clore un essai arrêté avant que l'écoute ait commencé.
-  function finish(why, force) {
-    if (finished || (!active && !force)) return;
-    finished = true;
-    active = false;
-    clearTimeout(timer);
-    try { if (rec) rec.stop(); } catch (e) { /* déjà arrêtée */ }
-    paint();
-    const mine = userToks();
-    const r = {
-      v, n: store.results.filter((x) => x.v === v).length + 1,
-      where: standalone ? 'écran d’accueil' : 'Safari',
-      progress, total: EXPECTED.length, dur: fmt(now() - (listenAt || startAt)), why,
-      firstMs: firstAt ? Math.round(firstAt - listenAt) : null,
-      ends, errors: errors.slice(), hints: hints.slice(), extra: extra.slice(),
-      heard: join(mine), userWords: mine.length, partner: partnerText,
-    };
-    store.results.push(r);
-    save();
-    note(v + ' fin', why);
-    onDone(r);
-  }
-  return {
-    start, userTurn, finish,
-    stop: () => finish('arrêt par toi'),
-    addExtra: (s) => extra.push(s),
-    isActive: () => active,
-  };
+  });
 }
 
 // ---------- Voix du partenaire ----------
-function speakCue(v, done) {
-  if (!HAS_TTS) { note(v + ' partenaire', 'voix de synthèse absente'); done('absente'); return; }
-  const u = new SpeechSynthesisUtterance(SCENE.cue);
-  u.lang = 'fr-FR';
-  const voice = frVoices()[+$('voiceSel').value];
-  if (voice) { try { u.voice = voice; } catch (e) { /* voix refusée : voix par défaut */ } }
-  const asked = now();
-  let started = 0, over = false, w1 = null, w2 = null;
-  const end = (how) => { if (over) return; over = true; clearTimeout(w1); clearTimeout(w2); done(how); };
-  u.onstart = () => { started = now(); note(v + ' partenaire', `lecture commencée (${voice ? voice.name : 'voix par défaut'}), ${Math.round(started - asked)} ms après la demande`); };
-  u.onend = () => { note(v + ' partenaire', 'lecture finie en ' + fmt(now() - (started || asked))); end('lue'); };
-  u.onerror = (e) => { note(v + ' partenaire erreur', e.error); end('erreur ' + e.error); };
-  w1 = setTimeout(() => {
-    if (started) return;
-    note(v + ' partenaire', 'la voix n’a pas démarré en 5 s');
-    try { speechSynthesis.cancel(); } catch (e) { /* rien */ }
-    end('pas démarrée');
-  }, 5000);
-  w2 = setTimeout(() => { note(v + ' partenaire', 'fin de lecture jamais signalée, on continue'); end('fin non signalée'); }, 15000);
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+function b64(s) {
+  const bin = atob(s.slice(s.indexOf(',') + 1));
+  const a = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return a.buffer;
+}
+async function loadSounds(run) {
+  const ctx = run.ctx;
+  run.bufs = [];
+  for (const s of window.SOUNDS || []) run.bufs.push(await ctx.decodeAudioData(b64(s)));
+}
+function playFile(run, k) {
+  return new Promise((done) => {
+    const ctx = run.ctx;
+    const tag = run.v + ' partenaire ' + (k + 1);
+    if (!ctx || !run.bufs || !run.bufs[k]) { note(tag, 'fichier son indisponible'); done('indisponible'); return; }
+    if (ctx.state !== 'running') { note(tag, 'lecteur son ' + ctx.state + ', relancé'); ctx.resume().catch(() => {}); }
+    const src = ctx.createBufferSource();
+    src.buffer = run.bufs[k];
+    src.connect(ctx.destination);
+    const at = now(), c0 = ctx.currentTime;
+    let over = false;
+    const end = (how) => {
+      if (over) return; over = true; clearTimeout(w1); clearTimeout(w2);
+      note(tag, `lecture finie (${how}) en ${fmt(now() - at)}`);
+      done(how);
+    };
+    src.onended = () => end('lue');
+    run.src = src;
+    note(tag, 'lecture du fichier, lecteur ' + ctx.state + ', réglage ' + sessionInfo());
+    const w1 = setTimeout(() => { if (ctx.currentTime - c0 < 0.5) note(tag, 'le lecteur son n’avance pas (' + ctx.state + ')'); }, 1500);
+    const w2 = setTimeout(() => end('fin non signalée'), src.buffer.duration * 1000 + 4000);
+    try { src.start(); } catch (e) { note(tag + ' erreur', e.message); end('erreur'); }
+  });
+}
+function speak(run, k) {
+  return new Promise((done) => {
+    const tag = run.v + ' partenaire ' + (k + 1);
+    if (!HAS_TTS) { note(tag, 'voix de synthèse absente'); done('absente'); return; }
+    const u = new SpeechSynthesisUtterance(PARTNER[k]);
+    u.lang = 'fr-FR';
+    const voice = frVoices()[+$('voiceSel').value];
+    if (voice) { try { u.voice = voice; } catch (e) { /* voix refusée : voix par défaut */ } }
+    const asked = now();
+    let started = 0, over = false, w1 = null, w2 = null;
+    const end = (how) => { if (over) return; over = true; clearTimeout(w1); clearTimeout(w2); done(how); };
+    u.onstart = () => { started = now(); note(tag, `lecture commencée (${voice ? voice.name : 'voix par défaut'}), ${Math.round(started - asked)} ms après la demande`); };
+    u.onend = () => { note(tag, 'lecture finie en ' + fmt(now() - (started || asked)) + ', réglage ' + sessionInfo()); end('lue'); };
+    u.onerror = (e) => { note(tag + ' erreur', e.error); end('erreur ' + e.error); };
+    w1 = setTimeout(() => {
+      if (started) return;
+      note(tag, 'la voix n’a pas démarré en 5 s');
+      try { speechSynthesis.cancel(); } catch (e) { /* rien */ }
+      end('pas démarrée');
+    }, 5000);
+    w2 = setTimeout(() => { note(tag, 'fin de lecture jamais signalée, on continue'); end('fin non signalée'); }, 15000);
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+}
+
+// ---------- Micro tenu ouvert (variante G) ----------
+function holdMic(run) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    note(run.v + ' micro tenu', 'impossible dans ce navigateur');
+    return Promise.resolve(null);
+  }
+  return navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+    const tr = stream.getAudioTracks()[0];
+    note(run.v + ' micro tenu ouvert', `${tr ? tr.label || 'micro' : 'aucune piste'}, réglage ${sessionInfo()}`);
+    if (tr) {
+      tr.onmute = () => note(run.v + ' micro tenu', 'coupé par l’iPhone');
+      tr.onunmute = () => note(run.v + ' micro tenu', 'rétabli');
+      tr.onended = () => note(run.v + ' micro tenu', 'fermé par l’iPhone');
+    }
+    if (run.stopped) { stream.getTracks().forEach((x) => x.stop()); return null; }
+    run.stream = stream;
+    // Niveau du micro tenu : dit si le micro entend encore quand la reconnaissance n'entend rien.
+    try {
+      const an = run.ctx.createAnalyser();
+      an.fftSize = 2048;
+      run.ctx.createMediaStreamSource(stream).connect(an);
+      const buf = new Float32Array(an.fftSize);
+      run.meter = setInterval(() => {
+        an.getFloatTimeDomainData(buf);
+        let s = 0;
+        for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+        const db = 10 * Math.log10(s / buf.length + 1e-12);
+        if (run.turn && db > run.level) run.level = db;
+      }, 100);
+    } catch (e) { note(run.v + ' niveau du micro', 'indisponible : ' + e.message); }
+    return stream;
+  }).catch((e) => { note(run.v + ' micro tenu refusé', e.name + (e.message ? ' — ' + e.message : '')); return null; });
 }
 
 // ---------- Déroulé d'un essai ----------
-let current = SEQ[store.ptr] || 'D';
-let run = null; // { v, s, timers, stopped, voiceEnd }
-const alive = (s) => run && run.s === s && !run.stopped;
+let current = SEQ[store.ptr] || SEQ[0];
+let run = null;
+const alive = (r) => run === r && !r.stopped;
 
 function setBusy(b) {
   $('go').disabled = b;
@@ -481,75 +595,150 @@ function setBusy(b) {
   $('picker').querySelectorAll('button').forEach((x) => { x.disabled = b; });
   $('voiceSel').disabled = b;
 }
+function sleep(r, ms) { return new Promise((res) => r.timers.push(setTimeout(res, ms))); }
+
+// Tout ce qui doit profiter du toucher (écoute, lecteur son, micro, première voix) part ici, sans attendre.
 function startRun() {
   const v = current;
-  const s = makeSession(v, onRunDone);
-  run = { v, s, timers: [], stopped: false, voiceEnd: 0 };
-  $('atoi').hidden = true;
+  const V = VARIANTS[v];
+  const r = { v, V, timers: [], stopped: false, turns: [], voice: [], extra: [], errors: [], ends: 0,
+    hold: !!V.hold, level: -Infinity, ctx: null, bufs: null, stream: null, src: null, listener: null, turn: null, closed: false };
+  run = r;
+  $('ask').hidden = true;
   setBusy(true);
   idle();
-  note(v + ' lancée', VARIANTS[v].label);
-  if (v === 'D') {
-    phase('À toi : dis ta réplique');
-    s.start();
-  } else if (v === 'A') {
-    phase('Le partenaire parle…');
-    speakCue(v, (how) => {
-      if (!alive(s)) return;
-      s.addExtra('voix du partenaire : ' + how);
-      const tEnd = now();
-      phase('Attends…');
-      run.timers.push(setTimeout(() => {
-        if (!alive(s)) return;
-        s.addExtra('écoute lancée ' + fmt(now() - tEnd) + ' après la fin de la voix');
-        phase('À toi : dis ta réplique');
-        s.start();
-      }, WAIT_A_MS));
-    });
-  } else if (v === 'C') {
-    phase('Le partenaire parle…');
-    speakCue(v, (how) => {
-      if (!alive(s)) return;
-      s.addExtra('voix du partenaire : ' + how);
-      run.voiceEnd = now();
-      phase('Touche « À toi », puis dis ta réplique');
-      $('atoi').hidden = false;
-    });
-  } else if (v === 'B') {
-    phase('J’ouvre le micro…');
-    let spoken = false;
-    const partner = (why) => {
-      if (spoken || !alive(s) || !s.isActive()) return;
-      spoken = true;
-      if (why) note(v + ' partenaire', why);
-      phase('Le partenaire parle… (micro ouvert)');
-      speakCue(v, (how) => {
-        if (!alive(s)) return;
-        s.addExtra('voix du partenaire : ' + how);
-        phase('À toi : dis ta réplique');
-        s.userTurn();
-      });
-    };
-    s.start({
-      muted: true,
-      onListening: () => partner(),
-      onStarted: () => run.timers.push(setTimeout(() => partner('son pas signalé 3 s après le début de l’écoute, la voix part quand même'), 3000)),
-    });
-    run.timers.push(setTimeout(() => partner('écoute toujours pas démarrée après 15 s, la voix part quand même'), 15000));
+  r.mode = setMode(V.mode);
+  note(v + ' lancée', `${V.label}, geste récent ${gesture()}, réglage ${sessionInfo()}`);
+  if (V.voice === 'fichier') {
+    try {
+      r.ctx = new AC();
+      r.ctx.onstatechange = () => note(v + ' lecteur son', r.ctx.state);
+      r.ctx.resume().catch((e) => note(v + ' lecteur son', 'refusé : ' + e.message));
+    } catch (e) { note(v + ' lecteur son', 'impossible : ' + e.message); }
   }
+  const held = V.hold ? holdMic(r) : null;
+  let first = null;
+  if (v === 'T') {
+    showCue(0, false);
+    r.listener = makeListener(r, v + '1');
+  } else if (V.open) {
+    showCue(0, false);
+    phase('J’ouvre le micro…');
+    r.listener = makeListener(r, v);
+  } else if (V.voice === 'synthèse') {
+    showCue(0, true);
+    phase('Le partenaire parle…');
+    first = speak(r, 0);
+  }
+  scene(r, first, held).catch((e) => { note(v + ' incident', e.message); endRun(r, 'incident : ' + e.message); });
 }
-function onRunDone(r) {
-  if (run) run.timers.forEach(clearTimeout);
-  $('atoi').hidden = true;
+
+async function partner(r, k, first) {
+  showCue(k, true);
+  phase('Le partenaire parle…');
+  paintLine(k, 0, false);
+  let how;
+  if (r.V.voice === 'texte') { await sleep(r, TEXT_MS); how = 'texte affiché'; }
+  else if (r.V.voice === 'synthèse') how = await (first || speak(r, k));
+  else how = await playFile(r, k);
+  r.voice.push(`${k + 1} ${how}`);
+  showCue(k, false);
+}
+
+async function scene(r, first, held) {
+  const V = r.V;
+  if (V.voice === 'fichier') {
+    if (r.ctx) await loadSounds(r);
+    if (!alive(r)) return;
+  }
+  if (held) { await held; if (!alive(r)) return; }
+
+  if (r.v === 'T') {
+    phase('À toi : dis ta réplique');
+    await doTurn(r, 0, r.listener, 'au toucher');
+    if (!alive(r)) return;
+    await r.listener.stop();
+    if (!alive(r)) return;
+    await partner(r, 1);
+    if (!alive(r)) return;
+    r.listener = makeListener(r, r.v + '2');
+    phase('À toi : dis ta réplique');
+    await doTurn(r, 1, r.listener, 'sans toucher');
+  } else if (V.open) {
+    // Micro ouvert toute la scène : la voix part quand l'iPhone signale le son capté (ou après 3 s).
+    const L = r.listener;
+    const muted = (k) => { L.onChange = () => paintHeard(L.toks().slice(L.mark || 0), []); paintLine(k, 0, false); };
+    muted(0);
+    if (!L.audioAt) {
+      await new Promise((res) => { L.onAudio = res; r.timers.push(setTimeout(res, 3000)); });
+      L.onAudio = null;
+      if (!alive(r)) return;
+      if (!L.audioAt) note(r.v, 'son pas signalé 3 s après la demande, la voix part quand même');
+    }
+    for (const k of [0, 1]) {
+      muted(k);
+      await partner(r, k);
+      if (!alive(r)) return;
+      phase('À toi : dis ta réplique');
+      await doTurn(r, k, L, 'micro déjà ouvert');
+      if (!alive(r)) return;
+    }
+    await L.stop();
+  } else {
+    for (const k of [0, 1]) {
+      await partner(r, k, k === 0 ? first : null);
+      if (!alive(r)) return;
+      phase('Attends…');
+      await sleep(r, AFTER_MS);
+      if (!alive(r)) return;
+      r.listener = makeListener(r, r.v + (k + 1));
+      phase('À toi : dis ta réplique');
+      await doTurn(r, k, r.listener, 'sans toucher');
+      if (!alive(r)) return;
+      await r.listener.stop();
+      if (!alive(r)) return;
+    }
+  }
+  if (!alive(r)) return;
+  const ok = r.turns.filter((t) => t.progress === t.total).length;
+  endRun(r, `${ok} réplique${ok > 1 ? 's' : ''} complète${ok > 1 ? 's' : ''} sur 2`);
+}
+
+function cleanup(r) {
+  r.timers.forEach(clearTimeout);
+  clearInterval(r.meter);
+  if (r.turn) r.turn.finish('arrêt par toi');
+  if (r.listener) r.listener.abort();
+  try { if (r.src) r.src.stop(); } catch (e) { /* déjà finie */ }
+  try { if (HAS_TTS && r.V.voice === 'synthèse') speechSynthesis.cancel(); } catch (e) { /* rien */ }
+  if (r.stream) r.stream.getTracks().forEach((x) => x.stop());
+  if (r.ctx) r.ctx.close().catch(() => {});
+  setMode('auto');
+}
+
+function endRun(r, why) {
+  if (r.closed) return;
+  r.closed = true;
+  const byYou = why === 'arrêt par toi';
+  r.stopped = true;
+  cleanup(r);
+  const res = {
+    v: r.v, n: store.results.filter((x) => x.v === r.v).length + 1,
+    where: standalone ? 'écran d’accueil' : 'Safari', mode: r.mode, why,
+    turns: r.turns, voice: r.voice, extra: r.extra, errors: r.errors, ends: r.ends,
+  };
+  store.results.push(res);
+  note(r.v + ' fin', why);
   setBusy(false);
-  phase(`Fini : ${r.progress} mots sur ${r.total}` + (r.userWords ? '' : ' (ta voix n’a pas été entendue)'));
-  if (r.v === 'B' && !r.why.includes('avant ton tour')) {
+  const heard = r.turns.filter((t) => t.userWords > 0).length;
+  phase(byYou ? 'Arrêté.' : `Fini : ${why}` + (r.turns.length && !heard ? ' (ta voix n’a pas été entendue).' : '.'));
+  if (r.V.voice !== 'texte' && r.voice.length) {
     $('ask').hidden = false;
     $('ask').dataset.idx = store.results.length - 1;
+    $('askV').textContent = r.v + ' (' + r.V.label + ')';
     $('go').disabled = true;
-    phase($('phase').textContent + '. Réponds à la question ci-dessous.');
+    phase($('phase').textContent + ' Réponds à la question ci-dessous.');
   }
-  const byYou = r.why.includes('par toi');
   if (!byYou && SEQ[store.ptr] === r.v) store.ptr++;
   if (!byYou && SEQ[store.ptr]) current = SEQ[store.ptr];
   save();
@@ -557,44 +746,40 @@ function onRunDone(r) {
   renderReport();
 }
 function stopRun() {
-  if (!run || run.stopped) return;
-  const { s } = run;
-  run.stopped = true;
-  run.timers.forEach(clearTimeout);
-  try { if (HAS_TTS) speechSynthesis.cancel(); } catch (e) { /* rien */ }
-  if (s.isActive()) s.stop();
-  else s.finish('arrêté par toi avant ton tour', true); // voix en cours, attente de A, « À toi » pas touché
+  if (!run || run.closed) return;
+  endRun(run, 'arrêt par toi');
 }
 
 // ---------- Choix de la variante ----------
 function renderPicker() {
   const box = $('picker');
   box.replaceChildren();
-  for (const k of 'ABCD') {
+  for (const k of SEQ) {
     const b = document.createElement('button');
     b.type = 'button';
     b.id = 'v' + k;
     b.setAttribute('aria-pressed', String(k === current));
     const rs = store.results.filter((r) => r.v === k);
-    const best = rs.length ? Math.max(...rs.map((r) => r.progress)) : null;
+    const best = rs.length ? Math.max(...rs.map((r) => r.turns.filter((t) => t.progress === t.total).length)) : null;
     const key = document.createElement('span'); key.className = 'k'; key.textContent = k;
     const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = VARIANTS[k].label;
     const res = document.createElement('span');
-    res.className = 'res' + (best == null ? '' : best === EXPECTED.length ? ' yes' : best === 0 ? ' no' : '');
-    res.textContent = best == null ? '—' : `${best}/${EXPECTED.length}`;
+    res.className = 'res' + (best == null ? '' : best === 2 ? ' yes' : best === 0 ? ' no' : '');
+    res.textContent = best == null ? '—' : `${best}/2`;
     b.append(key, lab, res);
     b.addEventListener('click', () => { current = k; renderPicker(); idle(); });
     b.disabled = !$('stop').disabled; // pas de changement pendant un essai
     box.append(b);
   }
   $('desc').textContent = VARIANTS[current].desc;
-  $('voiceRow').hidden = current === 'D';
+  $('voiceRow').hidden = VARIANTS[current].voice !== 'synthèse';
   $('next').textContent = store.ptr < SEQ.length
-    ? `Ordre conseillé : D, A, B, C, puis D. Étape ${store.ptr + 1} sur ${SEQ.length}.`
+    ? `Ordre conseillé : ${SEQ.join(', ')}. Étape ${store.ptr + 1} sur ${SEQ.length}.`
     : 'Série finie : copie le rapport (tu peux refaire une variante en la touchant).';
 }
 function idle() {
-  paintLine(0, false);
+  showCue(0, false);
+  paintLine(0, 0, false);
   paintHeard([], []);
   $('prompt').textContent = '';
   $('score').textContent = '';
@@ -602,7 +787,6 @@ function idle() {
 }
 
 // ---------- Mise en route ----------
-$('cue').textContent = 'Le partenaire : « ' + SCENE.cue + ' »';
 const voiceSel = $('voiceSel');
 function fillVoices() {
   const keep = voiceSel.value;
@@ -613,19 +797,13 @@ function fillVoices() {
   renderReport();
 }
 if (HAS_TTS) speechSynthesis.addEventListener('voiceschanged', fillVoices);
+if (HAS_SESSION) { try { navigator.audioSession.onstatechange = () => note('réglage son', sessionInfo()); } catch (e) { /* rien */ } }
 fillVoices();
 $('go').addEventListener('click', startRun);
 $('stop').addEventListener('click', stopRun);
-$('atoi').addEventListener('click', () => {
-  if (!run || run.stopped) return;
-  $('atoi').hidden = true;
-  run.s.addExtra('toucher « À toi » ' + fmt(now() - run.voiceEnd) + ' après la fin de la voix');
-  phase('À toi : dis ta réplique');
-  run.s.start();
-});
 $('ask').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
   const r = store.results[+$('ask').dataset.idx];
-  if (r) { r.route = b.dataset.route; note('B son de la voix, selon toi', r.route); }
+  if (r) { r.route = b.dataset.route; note(r.v + ' son de la voix, selon toi', r.route); }
   $('ask').hidden = true;
   $('go').disabled = false;
   save();
@@ -636,8 +814,8 @@ $('copy').addEventListener('click', async () => {
   const out = $('copied');
   try { await navigator.clipboard.writeText(txt); out.textContent = 'Rapport copié : colle-le dans la conversation.'; }
   catch (e) {
-    const r = document.createRange(); r.selectNodeContents($('report'));
-    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    const rg = document.createRange(); rg.selectNodeContents($('report'));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg);
     out.textContent = 'Copie automatique refusée : le rapport est sélectionné, touche « Copier ».';
   }
 });
@@ -656,7 +834,11 @@ $('clear').addEventListener('click', () => {
 renderStatus();
 renderPicker();
 idle();
-note(store.log.length ? 'Page rouverte' : 'Page ouverte', (standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur') + ', à ' + new Date().toLocaleTimeString('fr-FR'));
+note(store.log.length ? 'Page rouverte' : 'Page ouverte', (standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur') + ', à ' + new Date().toLocaleTimeString('fr-FR') + ', réglage ' + sessionInfo());
+</script>
+<!-- Voix provisoire du partenaire : eSpeak NG avec la voix MBROLA fr1, en MP3 (sert seulement au test du micro). -->
+<script>
+window.SOUNDS = ['data:audio/mpeg;base64,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kop8NHrHFNdavqgpoQUQexw5ZuplTVV885yBhQUajwEDQ6kidEYONfyRKhUgESrC02LM5ndZ1XChchp3Jhl+Y1uUzEjhhoRd1HZdb2LKQHQW/NbOhU3MlgiajHJKoYxxZrblebGvLf//cemitY6BK2y1VkiFT2ZHABQITj/5XnsZW/ys6mFPRy5WMbQyFKX6F5vR5vy6Zf/zYsRrHTK6XALCRRQEJMFcRIhIC8i1NmwlhMQgHFl6E+2CMrYQxpu8AR+SQbBjws+YU3N3IHg6HpTROMpksllDN3NfqHYajtDUp8HSwGDjl/LZ+XZmRq1lcmVrLEHGePTIQQ6DUayQfuPuRutNQ0/vrbdyZnvrmbm5uQwQB58WFQyZAQv7PwEEhVn61UxBTUUzLjEwMFVVVVVVVVX/82DEhh1R/ewAyNksVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsRvAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82DEcAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYMRwAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVc3gbQwHl6I2hZebxzQbF+pAio+iK9aRoA4IIpANE9rKFEFoFgDGHzRMwKiYavDLAzxAACofzVInCKGkwA+GA2eAuQQYH6AMIAIJ/y5cwNKBpDYBYAbmgdRiCAnYLCBnQAR//8iZgaOYM6DYaeHwAf/zYsRvAAADSAFAAACqgWKFMNXAAIAaYOcSwucQ0NV//+37Ju++VxyA+AaAfANgZsZAdhXImkRQyMCc///////NDfU0uiV4ZdFJEm3Lw+zR1RmDQGGKoImOwnGdJqm1kSGKxEmxKym7C2GoYzGhB7GNwdGDgnmGoGp/GCgJCwbmDYamG4RmBoLopsnQwXo4D+7AyRMLCcbWgnhSkvD/82LE/ymrznQBlJgAzwQYQMAzUQsghIgQcISoagTYFguYoh4ijBOXeVka4skWSyHOavg5ZZYOYMHHs+szLOFTVUqiGoIp2MbxWvoUWjCxwK1X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WnqtNL3ma3PR+WTd7GGWU1u613H7cNOFWgitDVuzFpdR02o1Sx6UWKkvrV+fO//6pvy///9Z15ZANvCCqKZ3TU2t44asy3KzhUiluhypb1XLWX5frKmrWn5Q1/0qgQsC+xrgc4GsCvmApistvY1YzLb0qf5rTXrD//NixBscqYXID9h4ALTlRa7S1HCYk4EqE2IUdU8FWq21XsXWLW3///619df/NYu61r8W/9df/1i5exYSuZpS+k5clKaKhmhPjwiBqt3EsSuUe3CJR7/xKd8seKqPCJ8FfSJQ1I1MQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsQ4AAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82DEcAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsRvAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82DEcAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsRvAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82DEcAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsRvAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82DEcAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYMRwAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zYsRvAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/82LEbwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NixG8AAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==', 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAASwAALqEABwoNEREUGBsbHiIlJSgsLy8yNjk5PUBDQ0dKTU1RVFdXW15iYmVobGxvcnZ2eXyAgIOGioqNkZSUl5uenqGlqKirr7Kytrm8vMDDxsbKzdDQ1Nfb297h5eXo6+/v8vX5+fz/AAAAAExhdmM2MC4zMQAAAAAAAAAAAAAAACQDBQAAAAAAAC6hiqhCAwAAAAAAAAAAAAAAAAD/82DEAAAAA0gBQAAA8Asg5/iyCKeQ8if4S49DT8N8iDAf4EmNQwAHp/4F4QBsCbhc//8rCLhfxhwu4lYLR//+CuBcADWCviVjaJmkAHP////AvxlgFGCviVkYYclxGBMDQbw5H////+MgLwOQ0EsGAYlgqAXAe5TNDgwhQ///////HIam5fUaGjYK/2HqHAwo0Ys74CYPG8WvA3v/82LEjx9b4gABk2gBzM86xKM1MwOmnkOFaDsE5GBjyDkXNzc4ZeOYLkNQxITpDQIcPi+IKDsIOboCDQ9UjhZQgN/HtBiLl83IoKSGSJIn0zJP/kUNC4RQ0NyYKjE6ISjOF8ZUfQyQ1ST//6fU3y2FsJf/D4IfSAhcFmG01YBgKBUZXQKDicVI42ADAmFYMEcb90k+H3T8Mv5Sg2DF//NixKEgCiqYAZmIAJcEgCjwBZZAv4ZZgAxkPgoqcRZnL/HBFxqJ4aOKuxKZq3SYgoaLXBgC6E9IYrlLF1GGI5qWAbocY3Kl7W7U6Zm6lYQZAYkIoEMVr8dXcr2VWXnPtxxj2I3wHGhg6UY2PmGpkOz17ff+ljeu//mdpJsi+bhimLxRqqaauzG1Upn6caWIfv+b7U3jlhhvO7bytv/zYsSwO2Kayl+e2QPXmmTecYq5S/KW0F3C3Z/DXe73+HJu1ze//////cvUyX2sIw1Rxt05m4sohFaB3Cv2AA9YfTUC+nGBimaNdSBAIAEw4NNadxgbMODDkh8ABxpYkFgBXpiAiHBsw7CGRgIIBgIssiqqVFVgtLLZVLtVo80vWnA7QqlqQSrns66lEkkg1BqeuwEo97cXRlUGoET/82DEUiQ5tngH22AAGwNgbE5dpyTTFddbWta9tvr0zXLZazS56Zrb2anJNMSSTVx4FXZtINCF3/ET6wVBUNQnEQNBqDR7iUFT3KgqBITmGoLGqeZBcYjJ55DFxSzGEGzJaTTIoADAMKjEMJDBoCBwCkcV/pV22ZMlicdjEJgiH6eDztRLtTLDad5iiYlOjGpCYLblkYvA1B92S0H/82LEUCiqhkABXXgAmeQ9QsRb7e23jVHu939vT5jRX0kjbfe8Y3a/xi1LNXWobc4YgxaY+N/ed3pjUDf3/im879sffx7fefTWt11/fXr75mFWySgXLEA8TTYHjiVU3W0oKHab2/73ZbnaXy+ACOMnBwJl/2pqWSlDNnLrYK5ZsbQv1TNJpI3bCq0u5L9aWw5fibd10u1LZc29FXp6//NixD0viwLiX5jBAmTjQCK4GQSuxKIfjFfCxYUseRxJun/mNunuWMN9x2PBLfuRL3Alb6WY3P83/1LE5jvGY/7ErvV5fP1LGUovXbnd17dXD+4Ydw53WH/Xp4cl0hp5FZlcamcpi/q3hzm9b1znfz1hhv8/////+xPy6luQ5ST89OV87fd6w7nb53D8LCogOyXWsqSW8CINAgaTQP/zYsQOIrsi2l/JSAJKhNokRlA0rF3SqTTorRVMxyN/I3VRQqswqpsz2MbZzbhv//qUpSlvWZ8tlGpZ8p4iKtWAxM0ZicFoH4KFETbz1kQpUPKJySnNA2kujSV5Zid+nOlDLfTP12W6CUL22WlNJFe00K6dsL3EobPJXnrJbn/9Z//nr/6wEz6f0QW43LFSBUw3cTadR9yQaTyTAUT/82DEEyM7IsJWwlCPJUISA4ElRvYPojfppAyqI24wJ30y0h36cXO05vLKMFJLPy7hObSr+qLPuBd7p5YaMS//64ipd0MdEqX40Tn/+mps6Nm/04RvWlYVoXSuXQlYsdmKMFxqOjS2CgoWD0JBoxhNF3Q8O0gcQLEsXrdZlmtVn/v7vn6f3tIB6zsYAzKogeRIxERZOo3IBxcwkQT/82LEFSTBwq2szhg0XGoCOIO/Copff9I5rtcOBAllS+RrhHLilTYwWU19hfLbZmPADzNo7IQDHR0k7IBgsTr170KIzBuRg8UAghCAJCCNRJPERtdPHiHVtIwXErCZasLKtGGZiQBzOSmSvP0BYV4veIBO5L0O+0RMFTCaFtig4NZKC58+bFw5ccZsAvckVAtLD82My2UN3hxrDjKr//NixBIj6yrRtsMFRoqBm5eIF1HlqLLkVsd5R1ZbMmRqcsBVjaUzKgdJZjkpUQ40t0GlvepXAcPww12NNUbpC24oGJz2TLmNpqaAgmj446XALnJUFvZn/TZEUilcMtHKZmNKMhx5bKjPVFSiz0Xb//7/eqGztR92S6ItlVFVqNX+pYI+KfeSWYeVVRRRWHvWsZ9xUzQiRU0lo3WCFf/zYsQSHgMmuC7AxTaFpjGV6vHKm4S155c9+pVhQdobFSl1EbDCYzAjNnLU2AxTtKwuDwEU1SXPzC9lEMJC63PKnnTuaKd5/0RiYHUWDGNzdq2euj3l2l////+kk6h3Fspx71ZTTdDP82QGUJHfhOsqNhxlwZOiHSNdBka1x0MFcJvJCNcVRcIEjWXawdJu0CuQyuAZRTTMakN+5i//82DEKh661qgGyYU01A77QqKYRWXPuMsJw9ItnR+9v89eXNW8OR9QdL4eRKmHZ1rjUYlb46OZku3av9E168uXmV8hyquh////9O6MEWZ2AwMOdAYygeGDSzQLsDfewAKKVohnULXGYj5YEBzOUU/H4YCystqoECQSn2lKxN9HGGsqjj7PFF35lUpqTMxabiyWJSHKevhyC0YVZYz/82LEPh5yupAO0gswdRNFca/7a2tNcrUUzXJJu1qrExDszE1H+rPiToHmeEgZRQyFmmNNNQ3////ZHRBgs8yuoAmiTQC6R/h2cCoFLGAHK0mAEBgk9lNXBAXOEndterKo+hily6SwzzrRR9UxWK4shiUWdqM0timrM6h6gcqdrT3p3QKSjHJBXZy81wpMR/9Y0oqHQ6HSFDpww0xU//NixFQe4r5sFNDLKRrEcqUc1SlHOVH1ZDGTu+v/9Vq+jNsilRBYysY4qJDBYSAyY7puP9pxDKWg4luMbEzAiw2dmIm4w4BAokkgrUulo5iaBI2OhCVmMTRKViCqWwEonXUDJ0SPAITnw4iRR7kco2tmZNI43qnltmf2qmrTXBVHUaElEiJRLZyqc7ZnP/5nNNAJEFXlQVcVOlQVlf/zYsRoHsnOOADbDHA7DTIifU8RA0eDWoqd4i1nkiXJVQKkZaj+DTIGVIIAk4KALDTYWc2qxWBLZYQyNlDW3IcsDEHf/7mTLLZZZZbKn/9VRUdv+ioi3YyoqoqKn////0RSOxioqorP/6L+qKiL/7GKioikOxioqopimBgga0pMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82DEfBdrHW2UwMSxqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82LEbwAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NixG8AAANIAAAAAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYMRwAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYsRvAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82LEbwAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NixG8AAANIAAAAAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYMRwAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYsRvAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82LEbwAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NixG8AAANIAAAAAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYMRwAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq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qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYMRwAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYsRvAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82LEbwAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NixG8AAANIAAAAAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqTEFNRTMuMTAwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYMRwAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zYsRvAAADSAAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpMQU1FMy4xMDCqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/82LEbwAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'];
 </script>
 </body>
 </html>
