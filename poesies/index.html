@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mes poésies</title>
+<meta name="description" content="Apprendre ses poésies par cœur : l'iPad écoute, suit le texte et souffle quand on bloque.">
+<meta name="theme-color" content="#FBF6EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14181F" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Poésies">
+<style>
+:root {
+  --bg: #FBF6EE; --surface: #FFFFFF; --ink: #1F2430; --muted: #6A6F7C; --line: #E3DCCF;
+  --accent: #2F5D8A; --accent-ink: #FFFFFF; --ok: #1E7A4C; --skip: #B5651D; --hint: #2F5D8A;
+  --gold: #E9B21C; --soft: #F2ECE2; --blank: #CFC6B6;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #14181F; --surface: #1D232C; --ink: #EEF1F5; --muted: #A2A9B5; --line: #333B47;
+    --accent: #7FB2E5; --accent-ink: #0E1520; --ok: #6FD39E; --skip: #F0A766; --hint: #8EC1F2;
+    --gold: #F6C445; --soft: #252C37; --blank: #4A5260; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 18px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom)); }
+h1 { font-size: 32px; margin: 10px 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 22px; margin: 0 0 8px; }
+p { margin: 6px 0; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; color: var(--muted); }
+button { appearance: none; font: inherit; font-weight: 650; border-radius: 999px; padding: 12px 20px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.big { font-size: 26px; padding: 18px 28px; border-radius: 20px; width: 100%; }
+button.link { border: 0; background: none; color: var(--accent); padding: 6px 0; font-weight: 600; }
+button:disabled { opacity: .45; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin: 14px 0; }
+.poem-card { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border-radius: 18px; padding: 16px; margin: 10px 0; }
+.poem-card .t { font-size: 22px; font-weight: 700; display: block; }
+.poem-card .a { font-size: 15px; color: var(--muted); font-weight: 500; display: block; }
+.poem-card .s { margin-left: auto; font-size: 14px; color: var(--muted); font-weight: 500; text-align: right; white-space: nowrap; }
+.stars { color: var(--gold); letter-spacing: 1px; }
+.stars .off { color: var(--blank); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.steps button { border-radius: 16px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.2; min-width: 0; }
+.steps .n { font-size: 20px; font-weight: 750; }
+.steps .d { font-size: 13px; font-weight: 500; color: var(--muted); text-align: center; }
+.steps button[aria-pressed="true"] { border: 3px solid var(--accent); padding: 8px 4px; }
+.status { font-size: 24px; font-weight: 750; min-height: 1.5em; margin: 12px 0 4px; }
+.poem { font-family: Georgia, "Times New Roman", serif; font-size: 27px; line-height: 1.7; padding: 16px 18px; border-radius: 16px; background: var(--soft); }
+.poem .l { display: block; }
+.poem .w { border-radius: 6px; padding: 0 1px; transition: color .2s; }
+.poem .w.done { color: var(--ok); }
+.poem .w.skip { color: var(--skip); text-decoration: underline dotted; }
+.poem .w.hinted.done { color: var(--hint); }
+.poem .w.mask { color: transparent; border-bottom: 3px solid var(--blank); }
+.poem .w.next { outline: 3px solid var(--accent); outline-offset: 1px; }
+.bubble { font-size: 26px; font-weight: 750; color: var(--accent); min-height: 1.5em; margin: 10px 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted); margin-top: 8px; }
+.legend .ok { color: var(--ok); font-weight: 700; } .legend .sk { color: var(--skip); font-weight: 700; } .legend .hi { color: var(--hint); font-weight: 700; }
+.bravo { text-align: center; }
+.bravo .stars { font-size: 56px; }
+.bravo h2 { font-size: 30px; }
+label { display: block; font-weight: 600; margin-top: 12px; }
+input, textarea { font: inherit; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+textarea { min-height: 260px; font-family: Georgia, serif; line-height: 1.5; }
+.back { margin-top: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <!-- Bibliothèque -->
+  <section id="library">
+    <h1>Mes poésies</h1>
+    <p class="muted">Choisis ta poésie. L’iPad t’écoute la dire et t’aide si tu bloques.</p>
+    <div id="list"></div>
+    <div class="row"><button id="addBtn">Ajouter une poésie</button></div>
+    <p class="small">Pour les parents : les poésies et les progrès restent sur cet iPad. Pour reconnaître la voix, Safari peut envoyer le son à Apple.</p>
+  </section>
+
+  <!-- Ajout d'une poésie -->
+  <section id="editor" hidden>
+    <button class="link back" id="edBack">‹ Mes poésies</button>
+    <h1>Nouvelle poésie</h1>
+    <p class="muted">Recopie ou colle la poésie, un vers par ligne.</p>
+    <label for="edTitle">Titre</label>
+    <input id="edTitle" autocomplete="off">
+    <label for="edAuthor">Auteur (facultatif)</label>
+    <input id="edAuthor" autocomplete="off">
+    <label for="edText">Texte</label>
+    <textarea id="edText"></textarea>
+    <div class="row"><button class="primary" id="edSave">Enregistrer</button><span class="small" id="edMsg"></span></div>
+  </section>
+
+  <!-- Une poésie -->
+  <section id="reader" hidden>
+    <button class="link back" id="rdBack">‹ Mes poésies</button>
+    <h1 id="rdTitle"></h1>
+    <p class="muted" id="rdAuthor"></p>
+    <div class="steps" id="steps" role="group" aria-label="Étape"></div>
+    <p class="small" id="stepHelp"></p>
+    <div class="row" id="controls">
+      <button class="primary big" id="go">Je commence</button>
+      <button class="big" id="stop" hidden>J’arrête</button>
+      <button class="primary big" id="resume" hidden>Je continue</button>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="bubble" id="bubble" aria-live="polite"></div>
+    <div class="card bravo" id="bravo" hidden></div>
+    <div class="poem" id="poem"></div>
+    <div class="legend" id="legend">
+      <span><span class="ok">vert</span> : dit</span>
+      <span><span class="hi">bleu</span> : soufflé</span>
+      <span><span class="sk">orange</span> : sauté</span>
+    </div>
+    <div class="row"><button class="link" id="delBtn">Supprimer cette poésie</button></div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ---------- Réglages ----------
+const STALL_MS = 3000;   // blanc avant que le souffleur donne la première lettre
+const STEP_MS = 2500;    // puis une lettre de plus
+const FIRST_EXTRA = 1500; // avant le tout premier mot, on attend un peu plus
+const DEAF_MS = 15000;   // plus rien entendu : on arrête d'écouter et on propose « Je continue »
+const STEPS = [
+  { key: 'lire', n: '1. Je lis', d: 'texte affiché', help: 'Lis ta poésie à voix haute. Les mots deviennent verts quand l’iPad les entend.' },
+  { key: 'trous', n: '2. Avec des trous', d: 'un mot sur trois caché', help: 'Certains mots sont cachés. Dis toute la poésie : les mots cachés apparaissent quand tu les dis.' },
+  { key: 'coeur', n: '3. Par cœur', d: 'tout est caché', help: 'Tout est caché. Dis ta poésie par cœur. Si tu bloques, le souffleur t’aide : une lettre, puis deux, puis le mot.' },
+];
+// Exemple : Jean de La Fontaine, Fables, livre I, 2 (1668), domaine public ; orthographe modernisée.
+const EXAMPLE = {
+  id: 'exemple-corbeau', title: 'Le Corbeau et le Renard', author: 'Jean de La Fontaine', text: [
+    'Maître Corbeau, sur un arbre perché,',
+    'Tenait en son bec un fromage.',
+    'Maître Renard, par l’odeur alléché,',
+    'Lui tint à peu près ce langage :',
+    '« Hé ! bonjour, Monsieur du Corbeau.',
+    'Que vous êtes joli ! que vous me semblez beau !',
+    'Sans mentir, si votre ramage',
+    'Se rapporte à votre plumage,',
+    'Vous êtes le Phénix des hôtes de ces bois. »',
+    'À ces mots le Corbeau ne se sent pas de joie ;',
+    'Et pour montrer sa belle voix,',
+    'Il ouvre un large bec, laisse tomber sa proie.',
+    'Le Renard s’en saisit, et dit : « Mon bon Monsieur,',
+    'Apprenez que tout flatteur',
+    'Vit aux dépens de celui qui l’écoute :',
+    'Cette leçon vaut bien un fromage sans doute. »',
+    'Le Corbeau, honteux et confus,',
+    'Jura, mais un peu tard, qu’on ne l’y prendrait plus.',
+  ].join('\n'), history: [],
+};
+
+// ---------- Mots ----------
+function norm(w) {
+  return w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]/g, '');
+}
+function displayWords(text) {
+  const out = [];
+  for (const t of text.split(/(?<=[’'\-])|\s+/).filter(Boolean)) {
+    if (!norm(t) && out.length) out[out.length - 1] += ' ' + t;
+    else if (!norm(t)) out.push(t); // ponctuation en tête de vers (« ) : collée au mot suivant plus bas
+    else if (out.length && !norm(out[out.length - 1])) out[out.length - 1] += ' ' + t;
+    else out.push(t);
+  }
+  return out;
+}
+function tokens(text) { return text.replace(/[’']/g, '’ ').replace(/-/g, ' ').split(/\s+/).filter((t) => norm(t)); }
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  }
+  return d[a.length][b.length];
+}
+function same(a, b) {
+  if (a == null || b == null) return false;
+  if (a === b) return true;
+  return a.length >= 4 && b.length >= 4 && lev(a, b) <= 1;
+}
+// Suivi : position atteinte dans le texte et mots sautés. Tolère un mot en trop ou en moins ;
+// si deux mots entendus de suite se retrouvent plus loin (jusqu'à 15 mots), on y saute.
+function track(exp, heard, from) {
+  let i = from, j = 0;
+  const skipped = [];
+  while (i < exp.length && j < heard.length) {
+    if (same(exp[i], heard[j])) { i++; j++; continue; }
+    if (j + 1 < heard.length && same(exp[i], heard[j + 1])) { j += 2; i++; continue; }
+    if (i + 1 < exp.length && same(exp[i + 1], heard[j]) && exp[i + 1].length >= 3) { skipped.push(i); i += 2; j++; continue; }
+    let jump = 0;
+    if (j + 1 < heard.length && (heard[j].length >= 4 || heard[j + 1].length >= 4)) {
+      for (let d = 2; d <= 15 && i + d + 1 < exp.length; d++) {
+        if (same(exp[i + d], heard[j]) && same(exp[i + d + 1], heard[j + 1])) { jump = d; break; }
+      }
+    }
+    if (jump) { for (let k = i; k < i + jump; k++) skipped.push(k); i += jump; continue; }
+    j++;
+  }
+  return { pos: i, skipped };
+}
+
+// ---------- Mémoire (sur l'iPad seulement) ----------
+const KEY = 'poesies-v1';
+let db = { poems: [EXAMPLE] };
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s && Array.isArray(s.poems)) db = s;
+} catch (e) { /* mémoire indisponible */ }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { /* idem */ } }
+
+// ---------- Outils d'affichage ----------
+const $ = (id) => document.getElementById(id);
+const now = () => performance.now();
+const API = window.SpeechRecognition || window.webkitSpeechRecognition;
+function show(id) { for (const s of ['library', 'editor', 'reader']) $(s).hidden = s !== id; window.scrollTo(0, 0); }
+function starsEl(n, total = 3) {
+  const s = document.createElement('span');
+  s.className = 'stars';
+  s.setAttribute('aria-label', `${n} étoile${n > 1 ? 's' : ''} sur ${total}`);
+  for (let i = 0; i < total; i++) {
+    const x = document.createElement('span');
+    x.textContent = '★';
+    if (i >= n) x.className = 'off';
+    s.append(x);
+  }
+  return s;
+}
+function best(poem, key) {
+  const h = poem.history.filter((x) => x.step === key);
+  return h.length ? Math.max(...h.map((x) => x.stars)) : null;
+}
+
+// ---------- Bibliothèque ----------
+function renderList() {
+  const box = $('list');
+  box.replaceChildren();
+  for (const p of db.poems) {
+    const b = document.createElement('button');
+    b.className = 'poem-card';
+    const left = document.createElement('span');
+    const t = document.createElement('span'); t.className = 't'; t.textContent = p.title;
+    const a = document.createElement('span'); a.className = 'a'; a.textContent = p.author || '';
+    left.append(t, a);
+    const right = document.createElement('span');
+    right.className = 's';
+    const bc = best(p, 'coeur');
+    if (bc != null) { right.append('Par cœur '); right.append(starsEl(bc)); }
+    else if (p.history.length) right.textContent = 'en cours';
+    else right.textContent = 'nouvelle';
+    b.append(left, right);
+    b.addEventListener('click', () => openPoem(p.id));
+    box.append(b);
+  }
+}
+
+// ---------- Ajout ----------
+$('addBtn').addEventListener('click', () => {
+  $('edTitle').value = ''; $('edAuthor').value = ''; $('edText').value = ''; $('edMsg').textContent = '';
+  show('editor');
+  $('edTitle').focus();
+});
+$('edBack').addEventListener('click', () => show('library'));
+$('edSave').addEventListener('click', () => {
+  const title = $('edTitle').value.trim();
+  const text = $('edText').value.replace(/\r/g, '').split('\n').map((l) => l.trim()).filter(Boolean).join('\n');
+  if (!title || !text) { $('edMsg').textContent = 'Il faut un titre et un texte.'; return; }
+  const p = { id: 'p' + Date.now().toString(36), title, author: $('edAuthor').value.trim(), text, history: [] };
+  db.poems.push(p);
+  save();
+  renderList();
+  openPoem(p.id);
+});
+
+// ---------- Une poésie ----------
+let poem = null, step = 'lire', lines = [], words = [], exp = [];
+let session = null; // séance d'écoute en cours
+
+function openPoem(id) {
+  poem = db.poems.find((p) => p.id === id);
+  if (!poem) return;
+  $('rdTitle').textContent = poem.title;
+  $('rdAuthor').textContent = poem.author || '';
+  lines = poem.text.split('\n').map(displayWords);
+  words = [];
+  lines.forEach((l, li) => l.forEach((w) => words.push({ w, li })));
+  exp = words.map((x) => norm(x.w));
+  const done = new Set(poem.history.map((x) => x.step));
+  step = done.has('trous') ? 'coeur' : done.has('lire') ? 'trous' : 'lire';
+  resetView();
+  show('reader');
+}
+function masked(i) {
+  if (step === 'lire') return false;
+  if (step === 'coeur') return true;
+  return i % 3 === 1 && exp[i].length >= 2;
+}
+function renderSteps() {
+  const box = $('steps');
+  box.replaceChildren();
+  for (const s of STEPS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'step-' + s.key;
+    b.setAttribute('aria-pressed', String(s.key === step));
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = s.n;
+    const d = document.createElement('span'); d.className = 'd'; d.textContent = s.d;
+    b.append(n, d);
+    const bs = best(poem, s.key);
+    if (bs != null) b.append(starsEl(bs));
+    b.disabled = !!session;
+    b.addEventListener('click', () => { step = s.key; resetView(); });
+    box.append(b);
+  }
+  $('stepHelp').textContent = STEPS.find((s) => s.key === step).help;
+}
+function paintPoem(state) {
+  const box = $('poem');
+  box.replaceChildren();
+  let i = 0;
+  lines.forEach((l) => {
+    const line = document.createElement('span');
+    line.className = 'l';
+    l.forEach((w, k) => {
+      const s = document.createElement('span');
+      const idx = i++;
+      let cls = 'w';
+      const said = state && idx < state.pos;
+      if (said && state.skipped.has(idx)) cls += ' skip';
+      else if (said) cls += ' done';
+      if (state && state.hinted.has(idx)) cls += ' hinted';
+      if (!said && masked(idx)) cls += ' mask';
+      if (state && state.active && idx === state.pos) cls += ' next';
+      s.className = cls;
+      s.textContent = w;
+      line.append(s);
+      if (k < l.length - 1 && !/[’'\-]$/.test(w)) line.append(' ');
+    });
+    box.append(line);
+  });
+}
+function resetView() {
+  $('bravo').hidden = true;
+  $('bubble').textContent = '';
+  $('status').textContent = '';
+  $('go').hidden = false; $('stop').hidden = true; $('resume').hidden = true;
+  $('go').textContent = 'Je commence';
+  renderSteps();
+  paintPoem(null);
+}
+$('rdBack').addEventListener('click', () => { if (session) session.end(false); show('library'); renderList(); });
+$('delBtn').addEventListener('click', () => {
+  if (!poem || session) return;
+  if (!confirm(`Supprimer « ${poem.title} » de cet iPad ?`)) return;
+  db.poems = db.poems.filter((p) => p !== poem);
+  save();
+  renderList();
+  show('library');
+});
+
+// ---------- Écoute et suivi ----------
+function startSession() {
+  if (!API) { $('status').textContent = 'Ce navigateur ne sait pas écouter : ouvre la page dans Safari.'; return; }
+  const st = { pos: 0, skipped: new Set(), hinted: new Set(), active: true, segFrom: 0, prevSkipped: new Set(),
+    startAt: Date.now(), hints: 0, lastAt: 0, openAt: 0, hintLevel: 0, timer: null, rec: null, base: '', finals: '', interim: '', ends: 0 };
+  session = st;
+  $('bravo').hidden = true;
+  $('go').hidden = true; $('stop').hidden = false; $('resume').hidden = true;
+  renderSteps();
+  st.end = (finished) => finish(st, finished);
+  listen(st);
+  paintPoem(st);
+  tick(st);
+}
+function listen(st) {
+  st.base = st.finals = st.interim = '';
+  st.segFrom = st.pos;
+  st.prevSkipped = new Set(st.skipped);
+  st.openAt = 0;
+  st.lastAt = 0;
+  st.hintLevel = 0;
+  $('status').textContent = 'Je prépare mes oreilles…';
+  startRec(st);
+}
+function startRec(st) {
+  const rec = new API();
+  st.rec = rec;
+  rec.lang = 'fr-FR';
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.onaudiostart = () => {
+    if (st.rec !== rec) return;
+    if (!st.openAt) st.openAt = now();
+    $('status').textContent = 'Vas-y, je t’écoute !';
+  };
+  rec.onresult = (e) => {
+    if (st.rec !== rec) return;
+    let fin = '', mid = '';
+    for (let r = 0; r < e.results.length; r++) {
+      const t = e.results[r][0].transcript;
+      if (e.results[r].isFinal) fin += t + ' '; else mid += t + ' ';
+    }
+    st.finals = fin; st.interim = mid;
+    update(st);
+  };
+  rec.onerror = (e) => { st.error = e.error; };
+  rec.onend = () => {
+    if (st.rec !== rec || !st.active) return;
+    st.ends++;
+    if (st.error === 'not-allowed' || st.error === 'service-not-allowed' || st.ends > 20) { pause(st, 'L’iPad n’a pas le droit d’écouter. Vérifie l’accès au micro dans les réglages de Safari.'); return; }
+    // L'iPad a coupé l'écoute : on relance, en gardant ce qui était entendu.
+    st.base += ' ' + st.finals + ' ' + st.interim;
+    st.finals = st.interim = '';
+    try { startRec(st); } catch (err) { pause(st, 'J’ai arrêté d’écouter.'); }
+  };
+  try { rec.start(); } catch (err) { pause(st, 'Je n’arrive pas à écouter. Touche « Je continue ».'); }
+}
+function update(st) {
+  if (!st.active) return;
+  const heard = tokens(st.base + ' ' + st.finals + ' ' + st.interim).map(norm);
+  const r = track(exp, heard, st.segFrom);
+  const t = now();
+  if (r.pos > st.pos) {
+    st.pos = r.pos;
+    st.hintLevel = 0;
+    $('bubble').textContent = '';
+    if (!st.openAt) st.openAt = t;
+    if (heard.length) $('status').textContent = 'Continue !';
+  }
+  st.skipped = new Set([...st.prevSkipped, ...r.skipped]);
+  if (heard.length) st.lastAt = t;
+  paintPoem(st);
+  if (st.pos >= exp.length) finish(st, true);
+}
+function tick(st) {
+  if (!st.active) return;
+  const t = now();
+  if (st.openAt && step !== 'lire') {
+    const idle = t - Math.max(st.lastAt, st.openAt);
+    const wait = STALL_MS + st.hintLevel * STEP_MS + (st.lastAt || st.pos ? 0 : FIRST_EXTRA);
+    if (st.pos < exp.length && idle > wait) {
+      st.hintLevel++;
+      const target = words[st.pos].w.replace(/[\s.,:;!?«»]/g, '');
+      const n = Math.min(st.hintLevel, target.length);
+      const full = n >= target.length;
+      $('bubble').textContent = full ? `Le mot, c’est : « ${target} »` : `Ça commence par « ${target.slice(0, n)} »`;
+      if (!st.hinted.has(st.pos)) { st.hinted.add(st.pos); st.hints++; }
+      if (full) st.hintLevel = target.length; // on ne va pas plus loin que le mot entier
+      paintPoem(st);
+    }
+  }
+  if (st.openAt && t - Math.max(st.lastAt, st.openAt) > DEAF_MS) { pause(st, 'Je n’entends plus rien. Quand tu es prêt, touche « Je continue ».'); return; }
+  st.timer = setTimeout(() => tick(st), 250);
+}
+// Pause : l'écoute s'arrête, la position est gardée ; « Je continue » relance au toucher.
+function pause(st, msg) {
+  st.active = false;
+  clearTimeout(st.timer);
+  const rec = st.rec; st.rec = null;
+  try { if (rec) rec.stop(); } catch (e) { /* déjà arrêtée */ }
+  $('status').textContent = msg;
+  $('bubble').textContent = '';
+  $('stop').hidden = false; $('resume').hidden = false;
+  paintPoem(st);
+}
+$('resume').addEventListener('click', () => {
+  const st = session;
+  if (!st) return;
+  st.active = true;
+  st.error = null;
+  st.ends = 0;
+  $('resume').hidden = true;
+  listen(st);
+  paintPoem(st);
+  tick(st);
+});
+function finish(st, finished) {
+  if (session !== st) return;
+  st.active = false;
+  clearTimeout(st.timer);
+  const rec = st.rec; st.rec = null;
+  try { if (rec) rec.stop(); } catch (e) { /* déjà arrêtée */ }
+  session = null;
+  $('go').hidden = false; $('stop').hidden = true; $('resume').hidden = true;
+  $('go').textContent = 'Recommencer';
+  $('bubble').textContent = '';
+  if (!finished) { $('status').textContent = ''; renderSteps(); paintPoem(st); return; }
+  const help = st.hints + st.skipped.size;
+  const stars = help === 0 ? 3 : help <= 2 ? 2 : 1;
+  const dur = Math.round((Date.now() - st.startAt) / 1000);
+  poem.history.push({ date: new Date().toISOString(), step, stars, hints: st.hints, skipped: st.skipped.size, dur });
+  save();
+  $('status').textContent = '';
+  const b = $('bravo');
+  b.replaceChildren();
+  const h = document.createElement('h2');
+  h.textContent = stars === 3 ? 'Bravo, sans aucune aide !' : stars === 2 ? 'Très bien !' : 'Tu es allé jusqu’au bout !';
+  const p = document.createElement('p');
+  const bits = [];
+  bits.push(st.hints ? `${st.hints} mot${st.hints > 1 ? 's' : ''} soufflé${st.hints > 1 ? 's' : ''}` : 'aucun mot soufflé');
+  bits.push(st.skipped.size ? `${st.skipped.size} mot${st.skipped.size > 1 ? 's' : ''} sauté${st.skipped.size > 1 ? 's' : ''} (en orange)` : 'aucun mot sauté');
+  p.textContent = bits.join(', ') + `, en ${dur} s.`;
+  b.append(starsEl(stars), h, p);
+  const idx = STEPS.findIndex((s) => s.key === step);
+  if (stars >= 2 && idx < STEPS.length - 1) {
+    const nx = document.createElement('button');
+    nx.className = 'primary';
+    nx.textContent = 'Étape suivante : ' + STEPS[idx + 1].n.replace(/^\d\. /, '');
+    nx.addEventListener('click', () => { step = STEPS[idx + 1].key; resetView(); });
+    const row = document.createElement('div'); row.className = 'row'; row.style.justifyContent = 'center'; row.append(nx);
+    b.append(row);
+  }
+  b.hidden = false;
+  renderSteps();
+  paintPoem(st);
+}
+$('go').addEventListener('click', () => { $('bubble').textContent = ''; startSession(); });
+$('stop').addEventListener('click', () => { if (session) finish(session, false); });
+
+renderList();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
