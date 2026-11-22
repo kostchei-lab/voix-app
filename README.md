@@ -3,6 +3,9 @@
 Appli web d'entraînement vocal, pensée pour l'iPhone (Safari, ajoutée à l'écran d'accueil).
 Tout se passe sur l'appareil : aucun son ne part sur Internet.
 
+Ce dépôt est la seule source du code (Voix, Poésies, Souffleur, page de test) ; il est publié par GitHub Pages depuis `main`.
+Les notes de projet et les recherches sont ailleurs, dans un dépôt privé.
+
 ## Nouveau dans la version 0.4
 
 - **Parole → Zone calme** : parler debout avec la voix du calme. Une courbe de hauteur défile sur fond de bande verte
@@ -39,9 +42,11 @@ Tout se passe sur l'appareil : aucun son ne part sur Internet.
   respirations, intention, conseil) à côté de chaque réplique, et pour chaque prise le débit, les pauses, la mélodie
   (étendue, fin montante ou descendante) et le volume, avec réécoute et rappel de la prise précédente. Réutilise le micro
   et la mesure de hauteur de Voix (`js/`).
-- **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v3 : enchaîner sans toucher).
+- **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v4 : enchaîner quatre répliques sans toucher,
+  page rechargée avant chaque essai, lecteur de la page comparé au lecteur ordinaire).
 
 Tests : `npm test` (dont les mesures de Souffleur), `node tests/e2e-poesies.cjs . <captures>`,
+`node tests/e2e-souffleur-test.cjs . <captures>` (page de test v4),
 `python3 tests/make-test-replique.py <replique.wav>` puis `node tests/e2e-souffleur-jeu.cjs . <replique.wav> <captures>`.
 
 ## Technique
