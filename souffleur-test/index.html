@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Test souffleur v5</title>
-<meta name="description" content="Test v5 sur iPhone : appli fermée entre deux essais ; rechargement, lecteur ordinaire, micro de la page seul et écouteurs mis à l’épreuve.">
+<title>Test souffleur v5.1</title>
+<meta name="description" content="Test v5.1 sur iPhone : appli fermée entre deux essais ; rechargement, lecteur ordinaire, micro de la page seul, écouteurs et mode avion mis à l’épreuve.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,7 @@ p { margin: 6px 0; }
 .status dt { color: var(--muted); }
 .status dd { margin: 0; font-weight: 600; }
 .yes { color: var(--ok); } .no { color: var(--bad); }
-.track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }
+.track { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 8px 0; }
 .track div { border: 1px solid var(--line); border-radius: 12px; padding: 6px 4px; text-align: center; line-height: 1.25; }
 .track .k { display: block; font-size: 20px; font-weight: 700; }
 .track .res { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
@@ -71,15 +71,15 @@ ol.steps li { margin: 4px 0; }
 </head>
 <body>
 <main>
-  <h1>Test souffleur v5 : appli fermée entre deux essais</h1>
-  <p class="lead">Au test v4, l’écoute a suivi quatre répliques sans toucher au premier essai, puis n’a plus rien entendu, même après rechargement. Ici, on ferme l’appli entre deux essais, et chaque essai met une explication à l’épreuve : rechargement, lecteur ordinaire, micro de la page seul, écouteurs.</p>
+  <h1>Test souffleur v5.1 : appli fermée entre deux essais</h1>
+  <p class="lead">Au test v4, l’écoute a suivi quatre répliques sans toucher au premier essai, puis n’a plus rien entendu, même après rechargement. Ici, on ferme l’appli entre deux essais, et chaque essai met une explication à l’épreuve : rechargement, lecteur ordinaire, micro de la page seul, écouteurs. Le dernier, en mode avion, dit si la reconnaissance se fait sur ton iPhone.</p>
   <div class="card">
     <h2>Mode d’emploi (≈ 10 min)</h2>
     <ol class="steps">
-      <li>Coupe le mode silencieux et monte le son aux trois quarts. Le titre doit dire « v5 ».</li>
+      <li>Coupe le mode silencieux et monte le son aux trois quarts. Le titre doit dire « v5.1 ».</li>
       <li>Avant chaque essai, la page dit quoi faire : <strong>fermer l’appli</strong> (glisse lentement du bas de l’écran vers le haut, arrête-toi au milieu, puis pousse la carte « Test souffleur » vers le haut) et la rouvrir par son icône, ou seulement recharger la page.</li>
       <li>Touche « Lancer », puis <strong>ne touche plus l’écran</strong> jusqu’à « Fini » : le partenaire parle, puis tu dis la réplique affichée, d’une voix normale. Si rien ne bouge, attends : la page passe seule à la suite après 10 s.</li>
-      <li>Réponds aux trois questions, puis suis la consigne de l’essai suivant. Cinq essais ; le cinquième, avec écouteurs, est facultatif.</li>
+      <li>Réponds aux trois questions, puis suis la consigne de l’essai suivant. Six essais ; les deux derniers (écouteurs, mode avion) sont facultatifs : « Passer cet essai » les saute.</li>
       <li>Touche « Copier le rapport » et colle-le dans la conversation.</li>
     </ol>
     <p class="small">Si l’iPhone demande l’accès au micro, accepte : une question le notera. La voix du partenaire reste provisoire (robotique) : elle sert seulement à savoir si le micro tient.</p>
@@ -89,16 +89,19 @@ ol.steps li { margin: 4px 0; }
 
   <section class="card" id="scene">
     <h2 id="stepTitle"></h2>
-    <div class="track" id="track" aria-label="Les cinq essais"></div>
+    <div class="track" id="track" aria-label="Les six essais"></div>
     <p class="desc" id="desc"></p>
     <p class="notice" id="condWarn" hidden></p>
+    <p class="notice" id="netWarn" hidden>La page est encore connectée. Active le mode avion et coupe le Wi-Fi (centre de contrôle), puis reviens ici : « Lancer » quand la page indique « hors ligne ».</p>
     <div class="row">
       <button class="primary" id="go">Lancer</button>
       <button id="stop" disabled>Arrêter</button>
       <button id="reload" hidden>Recharger la page</button>
+      <button id="skip" hidden>Passer cet essai</button>
     </div>
     <div class="next" id="next" hidden></div>
     <div class="phase" id="phase" aria-live="polite"></div>
+    <div class="next" id="verdict" hidden></div>
     <div class="meter" id="meter" hidden aria-hidden="true"><i id="meterBar"></i></div>
     <div class="ask" id="ask" hidden>
       <p><strong>1.</strong> Pendant cet essai, la voix du partenaire, tu l’as entendue…</p>
@@ -189,8 +192,10 @@ const STEPS = [
     desc: 'Deux échanges avec le lecteur ordinaire de Safari (M′), puis deux avec le lecteur de la page (M), sans recharger : le lecteur ordinaire rend-il l’écoute sourde ?' },
   { id: 'P', title: 'micro de la page seul, appli rouverte', need: 'fresh', n: 4, players: 'PPPP', mode: 'level',
     desc: 'Sans la reconnaissance d’Apple : la page ouvre le micro une seule fois, comme un appel vidéo, et mesure seulement le niveau de ta voix. Le micro reste-t-il vivant d’un bout à l’autre ? La page passe à la suite quand tu t’arrêtes de parler.' },
-  { id: 'H', title: 'M avec écouteurs, appli rouverte', need: 'fresh', n: 4, players: 'PPPP', mode: 'apple',
+  { id: 'H', title: 'M avec écouteurs, appli rouverte', need: 'fresh', n: 4, players: 'PPPP', mode: 'apple', optional: true,
     desc: 'Facultatif : le même M avec tes AirPods (ou d’autres écouteurs), mis avant de rouvrir l’appli. Le son arrive-t-il dans les écouteurs, et l’iPhone t’entend-il par leur micro ?' },
+  { id: 'V', title: 'M en mode avion, appli rouverte', need: 'fresh', n: 2, players: 'PP', mode: 'apple', optional: true, offline: true,
+    desc: 'Facultatif : le même M, en mode avion et Wi-Fi coupé, sur deux échanges. Si tes mots sont reconnus sans connexion, ton iPhone fait la reconnaissance sur place ; d’après le code de Safari, il l’y oblige alors, même connecté : ta voix ne part pas chez Apple.' },
 ];
 const NEED_FR = { fresh: 'appli fermée puis rouverte', reload: 'page rechargée sans fermer l’appli' };
 
@@ -245,7 +250,7 @@ function hintTarget(k, i) {
 
 // ---------- Mémoire du rapport (sur l'iPhone seulement) ----------
 const KEY = 'souffleur-test-v5';
-function fresh() { return { log: [], results: [], ptr: 0, loads: 0 }; }
+function fresh() { return { log: [], results: [], ptr: 0, loads: 0, skipped: [] }; }
 let store = fresh();
 let storeOk = true;
 try {
@@ -300,6 +305,15 @@ function setMode(type) {
   try { return navigator.audioSession.type; } catch (e) { return '?'; }
 }
 
+// ---------- Essai V : la reconnaissance marche-t-elle sans connexion ? ----------
+const online = () => navigator.onLine !== false;
+function offlineVerdict(r) {
+  if (r.online) return 'page encore connectée au lancement : l’essai ne permet pas de conclure';
+  if (r.turns.some((t) => t.userWords > 0)) return 'mots reconnus sans connexion : ton iPhone fait la reconnaissance sur place';
+  if (r.errors.includes('network')) return 'erreur « réseau » : sans connexion, la reconnaissance ne marche pas ; connecté, ta voix part chez Apple';
+  return 'rien reconnu, sans erreur « réseau » : on ne peut pas conclure (l’écoute est peut-être sourde)';
+}
+
 // ---------- Rapport ----------
 function stepOf(ptr) { return { S: STEPS[ptr % STEPS.length], extra: ptr >= STEPS.length }; }
 const stepById = (id) => STEPS.find((s) => s.id === id);
@@ -328,7 +342,8 @@ function condText(r) {
 }
 function resultLine(r) {
   const S = stepById(r.id);
-  const parts = [`Essai ${r.step}${r.extra ? ' (en plus)' : ''}, ${r.id} ${S.title} (page n° ${r.load}, ${condText(r)}, ${r.where}, réglage ${r.mode}${r.mic ? ', micro de la page ' + r.mic : ''}) : ${r.why}`];
+  const parts = [`Essai ${r.step}${r.extra ? ' (en plus)' : ''}, ${r.id} ${S.title} (page n° ${r.load}, ${condText(r)}, ${r.where}, réglage ${r.mode}${r.mic ? ', micro de la page ' + r.mic : ''}${S.offline ? `, connexion au lancement : ${r.online ? 'EN LIGNE' : 'hors ligne'}, à la fin : ${r.onlineEnd ? 'en ligne' : 'hors ligne'}` : ''}) : ${r.why}`];
+  if (r.verdict) parts.push('conclusion : ' + r.verdict);
   r.turns.forEach((t) => parts.push(turnText(t)));
   if (r.voice.length) parts.push('partenaire : ' + r.voice.join(' / '));
   parts.push('son, selon toi : ' + ([r.route, r.side].filter(Boolean).join(', ') || 'pas répondu'));
@@ -340,17 +355,19 @@ function resultLine(r) {
 }
 function synthesis() {
   const rs = store.results.filter((r) => r.why !== 'arrêt par toi');
-  if (!rs.length) return ['(aucun essai)'];
-  return rs.map((r) => {
+  const lines = rs.map((r) => {
     const S = stepById(r.id);
     const per = r.turns.map((t) => (t.level ? (heardOk(t) ? 'oui' : 'non') : `${t.player || 'M'} ${t.progress}/${t.total}`)).join(', ');
     const n = r.turns.filter(heardOk).length;
-    return `${r.step}. ${r.id} ${S.title} (${condText(r)}) : ta voix ${S.mode === 'level' ? 'repérée' : 'entendue'} ${n}/${r.turns.length} [${per}] ; son : ${[r.route, r.side].filter(Boolean).join(', ') || 'pas répondu'}`;
+    return { step: r.step, text: `${r.step}. ${r.id} ${S.title} (${condText(r)}) : ta voix ${S.mode === 'level' ? 'repérée' : 'entendue'} ${n}/${r.turns.length} [${per}] ; son : ${[r.route, r.side].filter(Boolean).join(', ') || 'pas répondu'}${r.verdict ? ' ; ' + r.verdict : ''}` };
   });
+  store.skipped.forEach((n) => { const S = STEPS[n - 1]; if (S) lines.push({ step: n, text: `${n}. ${S.id} ${S.title} : passé` }); });
+  if (!lines.length) return ['(aucun essai)'];
+  return lines.sort((a, b) => a.step - b.step).map((l) => l.text);
 }
 function report() {
   return [
-    'TEST SOUFFLEUR v5 (appli fermée entre deux essais) — rapport',
+    'TEST SOUFFLEUR v5.1 (appli fermée entre deux essais) — rapport',
     'Date : ' + new Date().toLocaleString('fr-FR'),
     'Navigateur : ' + navigator.userAgent,
     'Ouverte depuis l’écran d’accueil : ' + (standalone ? 'oui' : 'non'),
@@ -384,6 +401,7 @@ function renderStatus() {
   add('Ouverte depuis', standalone ? 'l’écran d’accueil' : 'Safari (ou autre navigateur)');
   add('Réglage « lecture et micro »', HAS_SESSION ? 'disponible' : 'absent', HAS_SESSION);
   add('Page', `n° ${LOAD}, ${COND_FR}`);
+  add('Connexion', online() ? 'en ligne' : 'hors ligne');
 }
 
 // ---------- Affichage de la scène ----------
@@ -753,16 +771,19 @@ function startRun() {
   const S = st.S;
   const r = { id: S.id, S, V: { name: S.id }, n: S.n, players: S.players, step: store.ptr + 1, extra: st.extra,
     timers: [], stopped: false, turns: [], voice: [], errors: [], ends: 0, touches: 0, blurs: 0, mutes: 0, trackEnded: false,
-    ctx: null, bufs: null, src: null, listener: null, turn: null, closed: false, stream: null, an: null, mic: null, micP: null };
+    ctx: null, bufs: null, src: null, listener: null, turn: null, closed: false, stream: null, an: null, mic: null, micP: null, online: true };
   run = r;
   setBusy(true);
   $('next').hidden = true;
   $('reload').hidden = true;
   $('condWarn').hidden = true;
+  $('netWarn').hidden = true;
+  $('verdict').hidden = true;
+  r.online = online();
   renderStep();
   idle();
   r.mode = setMode(PLAY_REC);
-  note(`Essai ${r.step} lancé`, `${S.id} ${S.title}, page n° ${LOAD} (${COND_FR}), geste récent ${gesture()}, réglage ${sessionInfo()}`);
+  note(`Essai ${r.step} lancé`, `${S.id} ${S.title}, page n° ${LOAD} (${COND_FR}), geste récent ${gesture()}, réglage ${sessionInfo()}, ${r.online ? 'en ligne' : 'hors ligne'}`);
   if (S.players.includes('P')) {
     try {
       r.ctx = new AC();
@@ -847,6 +868,11 @@ function endRun(r, why) {
     errors: r.errors, ends: r.ends, touches: r.touches, blurs: r.blurs, mutes: r.mutes, trackEnded: r.trackEnded,
     route: null, side: null, perm: null,
   };
+  if (r.S.offline) {
+    res.online = r.online;
+    res.onlineEnd = online();
+    if (!byYou) res.verdict = offlineVerdict(r);
+  }
   store.results.push(res);
   note(`Essai ${r.step} fini`, why);
   setBusy(false);
@@ -860,6 +886,14 @@ function endRun(r, why) {
     $('ask').hidden = false;
     $('ask').dataset.idx = store.results.length - 1;
     $('ask').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    if (res.verdict) {
+      $('verdict').replaceChildren();
+      const p1 = document.createElement('p'); const b = document.createElement('strong');
+      b.textContent = 'Mode avion : ' + res.verdict + '.'; p1.append(b);
+      const p2 = document.createElement('p'); p2.textContent = 'Tu peux couper le mode avion.';
+      $('verdict').append(p1, p2);
+      $('verdict').hidden = false;
+    }
   }
   save();
   renderStep();
@@ -881,8 +915,9 @@ function showNext() {
   } else if (S.need === 'reload') {
     add(`<strong>Essai ${num} : ${S.title}.</strong> Touche « Recharger la page », sans fermer l’appli.`);
   } else {
-    add(`<strong>Essai ${num} : ${S.title}.</strong>${S.id === 'H' ? ' Facultatif : si tu n’as pas d’écouteurs sous la main, arrête-toi là et copie le rapport. Sinon, mets-les d’abord.' : ''}`);
-    add('Ferme l’appli : glisse lentement du bas de l’écran vers le haut et arrête-toi au milieu, puis pousse la carte « Test souffleur » vers le haut. Rouvre-la ensuite par son icône.');
+    add(`<strong>Essai ${num} : ${S.title}.</strong>${S.id === 'H' ? ' Facultatif : si tu n’as pas d’écouteurs sous la main, touche « Passer cet essai ». Sinon, mets-les d’abord.' : ''}${S.id === 'V' ? ' Facultatif : pour le sauter, touche « Passer cet essai ».' : ''}`);
+    add('Ferme l’appli : glisse lentement du bas de l’écran vers le haut et arrête-toi au milieu, puis pousse la carte « Test souffleur » vers le haut. Rouvre-la ensuite par son icône' + (S.offline ? ', <strong>encore connecté</strong> (sans connexion, la page ne s’ouvrirait pas). Si tu viens de la rouvrir sans lancer d’essai, inutile de recommencer.' : '.'));
+    if (S.offline) add('Puis active le <strong>mode avion</strong> et coupe le <strong>Wi-Fi</strong> (centre de contrôle : glisse depuis le coin en haut à droite), et reviens ici. Touche « Lancer » quand la page indique « hors ligne ».');
     add('<span class="small">Si tu ne peux pas la fermer, recharge la page : ce sera noté dans le rapport.</span>');
   }
   box.hidden = false;
@@ -910,11 +945,39 @@ function renderStep() {
       const ok = r.turns.filter(heardOk).length;
       res.textContent = `${ok}/${r.turns.length}`;
       if (ok === r.turns.length) res.classList.add('yes'); else if (ok === 0) res.classList.add('no');
-    } else res.textContent = '—';
+    } else res.textContent = store.skipped.includes(i + 1) ? 'passé' : '—';
     d.append(k, res);
     box.append(d);
   });
   $('desc').textContent = S.desc;
+  updateSkip();
+  updateNet();
+}
+// « Passer cet essai » : seulement pour un essai facultatif pas encore fait, hors essai en cours et hors questions en attente.
+function updateSkip() {
+  const { S, extra } = stepOf(store.ptr);
+  const r = store.results[+$('ask').dataset.idx];
+  const waiting = !$('ask').hidden && r && r.why !== 'arrêt par toi' && !(r.route && r.side && r.perm);
+  $('skip').hidden = !(S.optional && !extra && !(run && !run.closed) && !waiting);
+}
+function skipStep() {
+  if (run && !run.closed) return;
+  const { S, extra } = stepOf(store.ptr);
+  if (!S.optional || extra) return;
+  store.skipped.push(store.ptr + 1);
+  note(`Essai ${store.ptr + 1} passé`, `${S.id} ${S.title}`);
+  store.ptr++;
+  save();
+  $('ask').hidden = true;
+  $('verdict').hidden = true;
+  renderStep();
+  if (ranHere || store.ptr >= STEPS.length) showNext(); else { $('next').hidden = true; checkCond(); }
+  renderReport();
+}
+// Essai V : avertir tant que la page est connectée.
+function updateNet() {
+  const { S, extra } = stepOf(store.ptr);
+  $('netWarn').hidden = !(S.offline && !extra && !ranHere && online());
 }
 // À l'ouverture : l'essai attendu demande-t-il une appli rouverte ou une page rechargée ?
 function checkCond() {
@@ -940,6 +1003,9 @@ function idle() {
 $('go').addEventListener('click', startRun);
 $('stop').addEventListener('click', stopRun);
 $('reload').addEventListener('click', () => { note('Recharger la page'); location.reload(); });
+$('skip').addEventListener('click', skipStep);
+window.addEventListener('online', () => { renderStatus(); updateNet(); if (run && !run.closed) note(run.V.name + ' connexion revenue'); });
+window.addEventListener('offline', () => { renderStatus(); updateNet(); if (run && !run.closed) note(run.V.name + ' connexion perdue'); });
 $('ask').querySelectorAll('.row').forEach((row) => row.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
   const r = store.results[+$('ask').dataset.idx];
   const q = row.dataset.q;
@@ -949,6 +1015,7 @@ $('ask').querySelectorAll('.row').forEach((row) => row.querySelectorAll('button'
   save();
   renderReport();
   if (r && r.route && r.side && r.perm) showNext();
+  updateSkip();
 })));
 // Un toucher pendant l'essai fausse le « sans toucher » : on le compte.
 document.addEventListener('pointerdown', (e) => {
@@ -977,6 +1044,7 @@ $('clear').addEventListener('click', () => {
   store.loads = loads;
   save();
   $('ask').hidden = true;
+  $('verdict').hidden = true;
   $('copied').textContent = '';
   if (!busy) { run = null; if (ranHere) showNext(); idle(); }
   renderStep();
@@ -988,7 +1056,7 @@ renderStatus();
 renderStep();
 idle();
 checkCond();
-note(`Page n° ${LOAD} : ${COND_FR}`, (standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur') + `, à ${new Date().toLocaleTimeString('fr-FR')}, chargement ${NAV}, ${SESSION}, réglage ${sessionInfo()}`);
+note(`Page n° ${LOAD} : ${COND_FR}`, (standalone ? 'depuis l’écran d’accueil' : 'dans le navigateur') + `, à ${new Date().toLocaleTimeString('fr-FR')}, chargement ${NAV}, ${SESSION}, réglage ${sessionInfo()}, ${online() ? 'en ligne' : 'hors ligne'}`);
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
-// Test de la page souffleur-test/ (test v5 : appli fermée entre deux essais ; essais A, R, X, P, H), avec une
+// Test de la page souffleur-test/ (test v5.1 : appli fermée entre deux essais ; essais A, R, X, P, H, V), avec une
 // reconnaissance, un réglage « lecture et micro » et un micro (getUserMedia) simulés ; les fichiers son sont réellement
 // décodés et joués par Chromium (lecteur de la page pour M, lecteur ordinaire pour M′). « Fermer l'appli » est simulé
-// par un nouvel onglet (mémoire de session neuve), « recharger » par un rechargement.
+// par un nouvel onglet (mémoire de session neuve), « recharger » par un rechargement, le mode avion par setOffline.
 // Usage : node tests/e2e-souffleur-test.cjs <racine servie (contient souffleur-test/ et icons/)> <dossier-captures>
 const { chromium } = require('playwright');
 const http = require('http');
@@ -29,6 +29,7 @@ const FAKE = `
     constructor() { window.__rec = this; this.results = []; }
     start() {
       window.__recStarts.push(performance.now());
+      if (window.__failNet) { setTimeout(() => { this.onerror && this.onerror({ error: 'network' }); this.onend && this.onend(); }, 20); return; }
       const d = window.__ready.length ? window.__ready.shift() : 500;
       setTimeout(() => this.onstart && this.onstart(), 5);
       setTimeout(() => this.onaudiostart && this.onaudiostart(), d);
@@ -110,7 +111,9 @@ const L = [
     await reopen();
     const text = (s) => page.$eval(s, (n) => n.textContent);
     const report = () => text('#report');
-    const waitLog = (s, timeout = 15000) => page.waitForFunction((x) => document.querySelector('#report').textContent.includes(x), s, { timeout });
+    // En cas d'échec, la fin du journal de la page est affichée.
+    const waitLog = (s, timeout = 15000) => page.waitForFunction((x) => document.querySelector('#report').textContent.includes(x), s, { timeout })
+      .catch(async (e) => { console.error(`${tag} attendu « ${s} » ; fin du journal :\n` + (await page.$eval('#report', (n) => n.textContent)).split('Journal :')[1].slice(-1200)); throw e; });
     const say = (t, f = true) => page.evaluate(([a, b]) => window.__say(a, b), [t, f]);
     const ready = (arr) => page.evaluate((a) => { window.__ready = a; }, arr);
     const mic = (v) => page.evaluate((x) => window.__mic(x), v);
@@ -124,9 +127,9 @@ const L = [
       await page.click(`#ask [data-q=perm] [data-a="${perm}"]`);
     };
 
-    check((await text('#stepTitle')) === 'Essai 1 sur 5 : A, M, appli rouverte, 8 échanges', `${tag} commence par l’essai 1, A`);
+    check((await text('#stepTitle')) === 'Essai 1 sur 6 : A, M, appli rouverte, 8 échanges', `${tag} commence par l’essai 1, A`);
     check((await text('#status')).includes('n° 1, appli rouverte') && await page.isHidden('#condWarn') && await page.isHidden('#reload') && await page.isEnabled('#go'), `${tag} page n° 1 vue comme appli rouverte, pas d’avertissement, Lancer actif`);
-    check((await page.$$('#track div')).length === 5, `${tag} cinq essais affichés`);
+    check((await page.$$('#track div')).length === 6, `${tag} six essais affichés`);
     if (width === 390) await page.screenshot({ path: `${shots}/${scheme}-${width}-accueil.png`, fullPage: true });
 
     // ---- Essai 1, A : M sur 8 échanges ; écoute prête en 0,01 s gardée telle quelle (plus de réouverture)
@@ -159,7 +162,7 @@ const L = [
     for (let k = 4; k <= 8; k++) await turn('A', k);
     await waitLog('Essai 1 fini : 8 répliques complètes sur 8');
     check(await ev(() => window.__plays) === 8, `${tag} A 8 répliques du partenaire jouées par le lecteur de la page`);
-    check(await page.isVisible('#ask') && await page.isDisabled('#go') && (await text('#stepTitle')).startsWith('Essai 1 sur 5 : A'), `${tag} A questions, Lancer bloqué, titre sur l’essai 1`);
+    check(await page.isVisible('#ask') && await page.isDisabled('#go') && (await text('#stepTitle')).startsWith('Essai 1 sur 6 : A'), `${tag} A questions, Lancer bloqué, titre sur l’essai 1`);
     if (width === 390) await page.screenshot({ path: `${shots}/${scheme}-${width}-questions.png`, fullPage: true });
     await answer('fort', 'venant du bas (haut-parleur)', 'non');
     check(await page.isVisible('#next') && (await text('#next')).includes('Essai 2 : M, page rechargée') && (await text('#next')).includes('Recharger la page') && await page.isVisible('#reload'), `${tag} A consigne : recharger la page pour l’essai 2 (R)`);
@@ -176,7 +179,7 @@ const L = [
     if (full) {
       // ---- Essai 2, R : page rechargée ; une réplique sans voix, un toucher compté
       await reload();
-      check((await text('#stepTitle')).startsWith('Essai 2 sur 5 : R') && (await text('#status')).includes('n° 2, page rechargée') && await page.isHidden('#condWarn'), `${tag} R page n° 2 rechargée, condition respectée`);
+      check((await text('#stepTitle')).startsWith('Essai 2 sur 6 : R') && (await text('#status')).includes('n° 2, page rechargée') && await page.isHidden('#condWarn'), `${tag} R page n° 2 rechargée, condition respectée`);
       check((await report()).includes('Essai 1, A M'), `${tag} R rapport gardé après rechargement`);
       await page.click('#go');
       await turn('R', 1);
@@ -198,7 +201,7 @@ const L = [
 
       // ---- Essai 3, X : appli rouverte ; M′ deux fois (1re dans le toucher), puis M deux fois
       await reopen();
-      check((await text('#stepTitle')).startsWith('Essai 3 sur 5 : X') && (await text('#status')).includes('n° 4, appli rouverte') && await page.isHidden('#condWarn'), `${tag} X page n° 4, appli rouverte, pas d’avertissement`);
+      check((await text('#stepTitle')).startsWith('Essai 3 sur 6 : X') && (await text('#status')).includes('n° 4, appli rouverte') && await page.isHidden('#condWarn'), `${tag} X page n° 4, appli rouverte, pas d’avertissement`);
       await page.click('#go');
       check(await ev(() => window.__elPlays === 1 && window.__elGesture[0] === true), `${tag} X 1re réplique lancée par le toucher (lecteur ordinaire)`);
       for (let k = 1; k <= 4; k++) await turn('X', k);
@@ -210,7 +213,7 @@ const L = [
 
       // ---- Essai 4, P : micro de la page seul, niveau mesuré ; voix, rien, micro muet, voix
       await reopen();
-      check((await text('#stepTitle')).startsWith('Essai 4 sur 5 : P') && (await text('#status')).includes('n° 5, appli rouverte'), `${tag} P page n° 5, appli rouverte`);
+      check((await text('#stepTitle')).startsWith('Essai 4 sur 6 : P') && (await text('#status')).includes('n° 5, appli rouverte'), `${tag} P page n° 5, appli rouverte`);
       await page.click('#go');
       await waitLog('P micro de la page : ouvert en');
       await waitLog('P1 ton tour');
@@ -250,7 +253,24 @@ const L = [
       for (let k = 1; k <= 4; k++) await turn('H', k);
       await waitLog('Essai 5 fini : 4 répliques complètes sur 4');
       await answer('fort', 'dans les écouteurs', 'non');
-      check((await text('#next')).includes('Série finie'), `${tag} H série finie`);
+      check((await text('#next')).includes('Essai 6 : M en mode avion') && (await text('#next')).includes('mode avion') && await page.isVisible('#skip'), `${tag} H consigne : essai 6 facultatif, en mode avion, bouton Passer`);
+
+      // ---- Essai 6, V : mode avion ; mots reconnus sans connexion
+      await reopen();
+      check((await text('#stepTitle')).startsWith('Essai 6 sur 6 : V') && await page.isVisible('#netWarn') && (await text('#status')).includes('en ligne'), `${tag} V page connectée : avertissement « mode avion »`);
+      await ctx.setOffline(true);
+      await page.waitForTimeout(100);
+      check(await page.isHidden('#netWarn') && (await text('#status')).includes('hors ligne') && await page.isEnabled('#go'), `${tag} V hors ligne : avertissement retiré, Lancer actif`);
+      await page.click('#go');
+      check(await page.isHidden('#skip'), `${tag} V pas de « Passer » pendant l’essai`);
+      for (let k = 1; k <= 2; k++) await turn('V', k);
+      await waitLog('Essai 6 fini : 2 répliques complètes sur 2');
+      check(await page.isVisible('#verdict') && (await text('#verdict')).includes('mots reconnus sans connexion'), `${tag} V conclusion affichée : ${await text('#verdict')}`);
+      if (width === 390) await page.screenshot({ path: `${shots}/${scheme}-${width}-mode-avion.png`, fullPage: true });
+      await answer('fort', 'venant du bas (haut-parleur)', 'non');
+      check((await text('#next')).includes('Série finie') && await page.isHidden('#skip'), `${tag} V série finie`);
+      check(/Essai 6, V M en mode avion, appli rouverte \(page n° 7, appli rouverte, Safari, réglage play-and-record, connexion au lancement : hors ligne, à la fin : hors ligne\) : 2 répliques complètes sur 2 ; conclusion : mots reconnus sans connexion/.test(await report()), `${tag} V essai 6 dans le rapport`);
+      await ctx.setOffline(false);
       const syn = (await report()).split('Essais :')[0];
       const want = [
         '1. A M, appli rouverte, 8 échanges (appli rouverte) : ta voix entendue 8/8 [M 18/18, M 12/12, M 12/12, M 10/10, M 10/10, M 12/12, M 10/10, M 8/8] ; son : fort, venant du bas (haut-parleur)',
@@ -258,23 +278,45 @@ const L = [
         '3. X M′ puis M, appli rouverte (appli rouverte) : ta voix entendue 4/4 [M′ 18/18, M′ 12/12, M 12/12, M 10/10]',
         '4. P micro de la page seul, appli rouverte (appli rouverte) : ta voix repérée 2/4 [oui, non, non, oui] ; son : assez fort, ça va',
         '5. H M avec écouteurs, appli rouverte (appli rouverte) : ta voix entendue 4/4 [M 18/18, M 12/12, M 12/12, M 10/10] ; son : fort, dans les écouteurs',
+        '6. V M en mode avion, appli rouverte (appli rouverte) : ta voix entendue 2/2 [M 18/18, M 12/12] ; son : fort, venant du bas (haut-parleur) ; mots reconnus sans connexion : ton iPhone fait la reconnaissance sur place',
       ];
       const miss = want.filter((w) => !syn.includes(w));
-      check(!miss.length, `${tag} synthèse des cinq essais${miss.length ? ' — manque : ' + miss.join(' | ') : ''}`);
+      check(!miss.length, `${tag} synthèse des six essais${miss.length ? ' — manque : ' + miss.join(' | ') : ''}`);
 
       // ---- Essai en plus arrêté
       await reload();
-      check((await text('#stepTitle')).startsWith('Essai en plus (6) : A'), `${tag} après la série : essai en plus (A)`);
+      check((await text('#stepTitle')).startsWith('Essai en plus (7) : A'), `${tag} après la série : essai en plus (A)`);
       await page.click('#go');
       await page.waitForTimeout(800);
       await page.click('#stop');
       check((await text('#phase')).startsWith('Arrêté') && await page.isVisible('#next') && await page.isHidden('#ask'), `${tag} arrêt : pas de question, consigne pour refaire l’essai`);
-      check(/Essai 6 \(en plus\), A .*: arrêt par toi ;.*touchers pendant l’essai 0/.test(await report()), `${tag} le bouton Arrêter n’est pas compté comme toucher`);
+      check(/Essai 7 \(en plus\), A .*: arrêt par toi ;.*touchers pendant l’essai 0/.test(await report()), `${tag} le bouton Arrêter n’est pas compté comme toucher`);
       await page.click('#copy');
       const clip = await ev(() => navigator.clipboard.readText());
-      check(clip.startsWith('TEST SOUFFLEUR v5') && clip.includes('Essai 4, P micro'), `${tag} rapport copié`);
+      check(clip.startsWith('TEST SOUFFLEUR v5.1') && clip.includes('Essai 4, P micro'), `${tag} rapport copié`);
       await page.click('#clear');
-      check((await text('#stepTitle')).startsWith('Essai 1 sur 5') && (await report()).includes('(aucun)'), `${tag} « Effacer » repart de l’essai 1`);
+      check((await text('#stepTitle')).startsWith('Essai 1 sur 6') && (await report()).includes('(aucun)'), `${tag} « Effacer » repart de l’essai 1`);
+    } else if (width === 390) {
+      // ---- Passer l'essai H, puis V en mode avion avec une reconnaissance qui a besoin du réseau
+      await page.evaluate(() => { const st = JSON.parse(localStorage.getItem('souffleur-test-v5')); st.ptr = 4; localStorage.setItem('souffleur-test-v5', JSON.stringify(st)); });
+      await reopen();
+      check((await text('#stepTitle')).startsWith('Essai 5 sur 6 : H') && await page.isVisible('#skip'), `${tag} H facultatif : bouton « Passer cet essai »`);
+      await page.click('#skip');
+      const cells = await page.$$eval('#track .res', (n) => n.map((x) => x.textContent));
+      check((await text('#stepTitle')).startsWith('Essai 6 sur 6 : V') && cells[4] === 'passé' && await page.isVisible('#netWarn') && await page.isEnabled('#go') && await page.isHidden('#next'), `${tag} H passé (${cells.join(' ')}), V prêt sur la même page, avertissement « mode avion »`);
+      await ctx.setOffline(true);
+      await page.waitForTimeout(100);
+      check(await page.isHidden('#netWarn'), `${tag} V hors ligne : avertissement retiré`);
+      await ev(() => { window.__failNet = true; });
+      await page.click('#go');
+      await waitLog('Essai 6 fini : 0 réplique complète sur 2', 20000);
+      check((await text('#verdict')).includes('erreur « réseau »') && (await report()).includes('V1 erreur : network'), `${tag} V erreur « réseau » : conclusion « ta voix part chez Apple »`);
+      await page.screenshot({ path: `${shots}/${scheme}-${width}-mode-avion-reseau.png`, fullPage: true });
+      await answer('fort', 'venant du bas (haut-parleur)', 'non');
+      const syn = (await report()).split('Essais :')[0];
+      check(syn.includes('5. H M avec écouteurs, appli rouverte : passé') && syn.includes('6. V M en mode avion, appli rouverte (appli rouverte) : ta voix entendue 0/2') && syn.includes('erreur « réseau » : sans connexion'), `${tag} synthèse : H passé, V erreur « réseau »`);
+      check((await text('#next')).includes('Série finie'), `${tag} V série finie`);
+      await ctx.setOffline(false);
     }
     check(errors.length === 0, `${tag} aucune erreur dans la console${errors.length ? ' : ' + errors.join(' | ') : ''}`);
     const overflow = await ev(() => document.documentElement.scrollWidth > window.innerWidth);

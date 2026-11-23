@@ -42,12 +42,12 @@ Les notes de projet et les recherches sont ailleurs, dans un dépôt privé.
   respirations, intention, conseil) à côté de chaque réplique, et pour chaque prise le débit, les pauses, la mélodie
   (étendue, fin montante ou descendante) et le volume, avec réécoute et rappel de la prise précédente. Réutilise le micro
   et la mesure de hauteur de Voix (`js/`).
-- **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v5 : appli fermée entre deux essais ;
+- **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v5.1 : appli fermée entre deux essais ;
   M sur huit échanges, page rechargée, lecteur ordinaire puis lecteur de la page, micro de la page seul sans la
-  reconnaissance d'Apple, écouteurs).
+  reconnaissance d'Apple, écouteurs, mode avion pour savoir si la reconnaissance se fait sur l'iPhone).
 
 Tests : `npm test` (dont les mesures de Souffleur), `node tests/e2e-poesies.cjs . <captures>`,
-`node tests/e2e-souffleur-test.cjs . <captures>` (page de test v5),
+`node tests/e2e-souffleur-test.cjs . <captures>` (page de test v5.1),
 `python3 tests/make-test-replique.py <replique.wav>` puis `node tests/e2e-souffleur-jeu.cjs . <replique.wav> <captures>`.
 
 ## Technique
