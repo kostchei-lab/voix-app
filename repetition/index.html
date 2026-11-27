@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Répétition</title>
+<meta name="description" content="Réviser un rôle : la page affiche le signal, écoute la réplique, allume les mots dits et souffle à l'écran quand on bloque.">
+<meta name="theme-color" content="#F7F4EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15181E" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Répétition">
+<style>
+:root {
+  --bg: #F7F4EF; --surface: #FFFFFF; --ink: #1E222B; --muted: #646A77; --line: #E1DBD0; --soft: #EFEAE1;
+  --accent: #8A2F3B; --accent-ink: #FFFFFF; --ok: #1E7A4C; --skip: #B25A12; --hint: #2F5D8A; --approx: #7A3F98;
+  --blank: #CBC2B3; --cue: #F4EFE6;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #15181E; --surface: #1D222A; --ink: #EDF0F4; --muted: #A1A8B4; --line: #323A46; --soft: #232A34;
+    --accent: #F08A97; --accent-ink: #1A0F12; --ok: #6FD39E; --skip: #F0A766; --hint: #8EC1F2; --approx: #D3A6F0;
+    --blank: #4A5260; --cue: #1F252E; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #15181E; --surface: #1D222A; --ink: #EDF0F4; --muted: #A1A8B4; --line: #323A46; --soft: #232A34;
+  --accent: #F08A97; --accent-ink: #1A0F12; --ok: #6FD39E; --skip: #F0A766; --hint: #8EC1F2; --approx: #D3A6F0;
+  --blank: #4A5260; --cue: #1F252E; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom)); }
+h1 { font-size: 30px; margin: 8px 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 21px; margin: 0 0 8px; }
+p { margin: 6px 0; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; color: var(--muted); }
+button, .filebtn { appearance: none; font: inherit; font-weight: 650; border-radius: 999px; padding: 11px 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-block; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.big { font-size: 22px; padding: 16px 24px; border-radius: 18px; width: 100%; }
+button.link { border: 0; background: none; color: var(--accent); padding: 6px 0; font-weight: 600; }
+button.danger { color: var(--skip); }
+button:disabled { opacity: .45; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 14px 0; }
+.text-card { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border-radius: 16px; padding: 14px 16px; margin: 10px 0; }
+.text-card .t { font-size: 19px; font-weight: 700; display: block; overflow-wrap: anywhere; }
+.text-card .a { font-size: 14px; color: var(--muted); font-weight: 500; display: block; }
+label.field { display: block; font-weight: 650; margin: 14px 0 6px; }
+input[type=text], textarea, select { width: 100%; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+textarea { min-height: 220px; font-size: 15px; line-height: 1.4; resize: vertical; }
+.filebtn { position: relative; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.cast label { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.cast label:last-child { border-bottom: 0; }
+.cast input { width: 22px; height: 22px; accent-color: var(--accent); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+.seg button { border: 0; border-radius: 0; padding: 10px 6px; background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.top { display: flex; align-items: center; gap: 8px; }
+.top h2 { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.progress { font-size: 14px; color: var(--muted); font-weight: 600; }
+.cue { background: var(--cue); border-left: 4px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 12px 0; }
+.cue .who { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.cue .say { font-family: Georgia, "Times New Roman", serif; font-size: 19px; }
+.cue .older { opacity: .6; font-size: 16px; }
+.didas { font-style: italic; color: var(--muted); font-size: 15px; margin: 4px 0; }
+.me-who { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--accent); margin-top: 6px; }
+.line { font-family: Georgia, "Times New Roman", serif; font-size: 25px; line-height: 1.65; padding: 14px 16px; border-radius: 14px; background: var(--soft); min-height: 3.5em; overflow-wrap: anywhere; }
+.line .w { border-radius: 6px; padding: 0 1px; }
+.line .w.todo { color: var(--muted); }
+.line .w.mask { color: transparent; border-bottom: 2px solid var(--blank); }
+.line .w.done { color: var(--ok); }
+.line .w.hint { color: var(--hint); }
+.line .w.skip { color: var(--skip); text-decoration: underline dotted; }
+.line .w.approx { color: var(--approx); text-decoration: underline wavy; text-decoration-thickness: 1px; }
+.line .w.next.mask { border-bottom-color: var(--accent); }
+.bubble { min-height: 1.6em; font-size: 24px; font-weight: 750; color: var(--hint); margin: 10px 0 0; }
+.status { font-size: 17px; font-weight: 650; min-height: 1.5em; margin: 10px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; margin-top: 8px; color: var(--muted); }
+.legend b { font-weight: 700; }
+.legend .ok { color: var(--ok); } .legend .hi { color: var(--hint); } .legend .sk { color: var(--skip); } .legend .ap { color: var(--approx); }
+ul.issues { padding-left: 18px; margin: 6px 0; }
+ul.issues li { margin: 4px 0; }
+pre.report { white-space: pre-wrap; font-size: 12px; background: var(--soft); border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.choices button[aria-pressed="true"] { border: 3px solid var(--accent); padding: 9px 16px; }
+.notice { border-left: 4px solid var(--hint); padding: 8px 12px; background: var(--soft); border-radius: 10px; font-size: 15px; }
+</style>
+</head>
+<body>
+<main>
+  <!-- Bibliothèque -->
+  <section id="library">
+    <h1>Répétition</h1>
+    <p class="muted">Révise ton rôle : la page affiche le signal, écoute ta réplique, allume les mots dits et souffle à l'écran quand tu bloques.</p>
+    <div id="list"></div>
+    <div class="row">
+      <button class="primary" id="add">Ajouter un texte</button>
+      <button id="example">Essayer la scène d'exemple</button>
+    </div>
+    <p class="small" style="margin-top:18px">Ton texte reste sur cet iPhone, dans la mémoire de la page ; il n'est envoyé nulle part. Pendant une séance, ta voix est reconnue par Apple, comme pour la dictée.</p>
+  </section>
+
+  <!-- Ajout d'un texte -->
+  <section id="editor" hidden>
+    <div class="top"><button class="link" id="ed-back">‹ Retour</button></div>
+    <h2>Ajouter un texte</h2>
+    <p class="small">Un PDF, un document Word (.docx) ou un fichier texte ; ou colle le texte copié ailleurs (site, PDF, Word). Chaque réplique commence par le nom du personnage : « NOM : texte », « NOM. — texte », ou le nom seul sur une ligne. Sans personnages (une poésie), tout le texte est à toi, paragraphe par paragraphe.</p>
+    <div class="row">
+      <label class="filebtn" id="file-label">Choisir un fichier<input type="file" id="file" accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"></label>
+      <span class="small" id="file-status"></span>
+    </div>
+    <label class="field" for="ed-title">Titre</label>
+    <input type="text" id="ed-title" placeholder="Titre (pour toi seul)" autocomplete="off">
+    <label class="field" for="ed-text">Texte</label>
+    <textarea id="ed-text" placeholder="Colle ici le texte, ou choisis un fichier." spellcheck="false"></textarea>
+    <div class="row"><button id="ed-parse">Repérer les personnages</button></div>
+    <div id="ed-result" class="card" hidden>
+      <p id="ed-summary"></p>
+      <div class="cast" id="ed-cast"></div>
+      <div class="row"><button class="primary" id="ed-save" disabled>Enregistrer sur l'iPhone</button></div>
+    </div>
+  </section>
+
+  <!-- Séance -->
+  <section id="session" hidden>
+    <div class="top">
+      <button class="link" id="se-back">‹ Textes</button>
+      <h2 id="se-title"></h2>
+      <span class="progress" id="se-progress"></span>
+    </div>
+    <div id="se-setup">
+      <div class="seg" role="group" aria-label="Affichage de ta réplique">
+        <button id="mode-voir" aria-pressed="false">Texte visible</button>
+        <button id="mode-coeur" aria-pressed="true">Par cœur</button>
+      </div>
+      <label class="field" for="se-from">Commencer à</label>
+      <select id="se-from"></select>
+      <div class="row"><button class="primary big" id="go">Commencer</button></div>
+      <p class="small">Un seul toucher : ensuite la page enchaîne seule. Lis le signal en silence, puis dis ta réplique. Après 3 s de blanc, elle souffle la première lettre, puis la moitié du mot, puis le mot.</p>
+      <div class="row"><button class="link danger" id="se-delete">Effacer ce texte de l'iPhone</button></div>
+    </div>
+    <div id="se-run" hidden>
+      <div id="cue"></div>
+      <div id="didas" class="didas"></div>
+      <div class="me-who" id="me-who"></div>
+      <div class="line" id="line" aria-live="polite"></div>
+      <div class="bubble" id="bubble" aria-live="assertive"></div>
+      <div class="status" id="status"></div>
+      <div class="legend"><span><b class="ok">vert</b> dit</span><span><b class="hi">bleu</b> soufflé</span><span><b class="sk">orange</b> sauté</span><span><b class="ap">violet</b> mot approché</span></div>
+      <div class="row">
+        <button id="resume" class="primary" hidden>Je continue</button>
+        <button id="skip">Réplique suivante</button>
+        <button id="stop">Arrêter</button>
+      </div>
+    </div>
+    <div id="se-end" class="card" hidden>
+      <h2 id="end-title"></h2>
+      <p id="end-sum"></p>
+      <ul class="issues" id="end-issues"></ul>
+      <div class="row" id="end-actions"></div>
+      <div id="beeps-box">
+        <p style="margin-top:16px"><b>Combien de bips as-tu entendus pendant cette séance ?</b></p>
+        <div class="choices" id="beeps"></div>
+      </div>
+      <p class="small" style="margin-top:14px">Rapport technique pour Claude : des nombres et des temps seulement, ni le texte, ni le titre, ni les personnages.</p>
+      <div class="row"><button id="copy">Copier le rapport technique</button><span class="small" id="copied"></span></div>
+      <pre class="report" id="report" hidden></pre>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ---------- Scène d'exemple (inventée, libre) ----------
+const EXAMPLE = {
+  title: 'Cent douze marches (exemple)', me: 'GASPARD',
+  text: [
+    '# Cent douze marches',
+    '',
+    'L’INSPECTRICE : Monsieur Gaspard ? On m’a dit que je vous trouverais ici, tout en haut.',
+    'GASPARD : Où voulez-vous que je sois ? Depuis trente ans, je monte ces cent douze marches deux fois par jour.',
+    'L’INSPECTRICE : Je viens de la part de la Direction des phares. J’ai une lettre pour vous.',
+    'GASPARD : Une lettre ? Posez-la sur la table, à côté de la lampe. Je la lirai quand la nuit sera tombée.',
+    'L’INSPECTRICE : Il vaudrait mieux la lire maintenant. Elle vous concerne directement.',
+    'GASPARD : Tout ce qui arrive ici me concerne directement, mademoiselle. Le vent, les bateaux, les mouettes, et maintenant vous.',
+    'L’INSPECTRICE : Le phare sera automatisé au printemps. Vous n’aurez plus besoin de monter.',
+    'GASPARD : Plus besoin de monter… Vous croyez qu’on monte cent douze marches parce qu’on en a besoin ?',
+    'L’INSPECTRICE : Que ferez-vous, alors ?',
+    'GASPARD : Je regarderai la lumière depuis la côte, comme tout le monde. Et je me demanderai qui veille sur elle.',
+    'L’INSPECTRICE : Personne. Une machine s’allumera seule, chaque soir, à la même heure.',
+    'GASPARD : Une machine ne sait pas qu’il y a de la brume avant qu’elle n’arrive. Moi, je la sens dans mes genoux, deux jours avant les marins.',
+    'L’INSPECTRICE : Je suis désolée, monsieur Gaspard. Ce n’est pas moi qui décide.',
+    'GASPARD : Je sais bien. Personne ne décide jamais rien. Asseyez-vous donc, le café est encore chaud.',
+    'L’INSPECTRICE : Vous ne m’en voulez pas ?',
+    'GASPARD : À vous ? Non. Vous avez monté les cent douze marches. Ça mérite au moins une tasse.',
+  ].join('\n'),
+};
+
+// Réglages (choix de conception)
+// blanc avant la 1re aide ; entre deux aides ; après le dernier mot, avant le signal suivant ; rien entendu → pause ;
+// temps de lecture du signal (base + par mot, borné). Les tests les raccourcissent par window.__TIMING.
+const T = Object.assign({ stall: 3000, step: 2000, end: 1200, deaf: 20000, readBase: 800, readWord: 280, readMin: 1500, readMax: 6000 }, window.__TIMING || {});
+
+// ---------- Mots ----------
+function norm(w) {
+  return w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]/g, '');
+}
+// Clé « à l'oreille » : deux mots qui se prononcent pareil ont la même clé (reverrai / reverrez, marche / marches).
+function sound(w) {
+  let s = w.toLowerCase().replace(/[éèêë]/g, '1').replace(/ç/g, 's').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/œ/g, 'e').replace(/æ/g, 'e').replace(/[^a-z0-9]/g, '');
+  if (s.length <= 3 && /es$/.test(s)) s = s.slice(0, -2) + '1';
+  s = s.replace(/(aient|ais|ait|est|ai|ez|er|et)$/, '1');
+  s = s.replace(/(es|e|s|x|t|d|p)$/, '');
+  s = s.replace(/eau|au/g, 'o').replace(/ph/g, 'f').replace(/qu/g, 'k').replace(/c(?=[ei1y])/g, 's').replace(/c/g, 'k')
+    .replace(/h/g, '').replace(/y/g, 'i').replace(/(.)\1+/g, '$1');
+  return s;
+}
+function displayWords(text) {
+  const out = [];
+  for (const t of text.split(/(?<=[’'\-])|\s+/).filter(Boolean)) {
+    if (!norm(t) && out.length) out[out.length - 1] += ' ' + t;
+    else if (!norm(t)) out.push(t);
+    else if (out.length && !norm(out[out.length - 1])) out[out.length - 1] += ' ' + t;
+    else out.push(t);
+  }
+  return out;
+}
+function tokens(text) { return text.replace(/[’']/g, '’ ').replace(/-/g, ' ').split(/\s+/).filter((t) => norm(t)); }
+function word(t) { return { raw: t, n: norm(t), s: sound(t) }; }
+function key(t) { return tokens(t).map(norm).join(' '); }
+// Nombres écrits en chiffres par la reconnaissance : « 112 » → « cent douze ».
+const UNITS = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+function below100(n) {
+  if (n < 20) return UNITS[n];
+  const t = Math.floor(n / 10), u = n % 10;
+  if (t === 7 || t === 9) return (t === 7 ? 'soixante' : 'quatre-vingt') + (t === 7 && u === 1 ? ' et ' : '-') + UNITS[10 + u];
+  if (t === 8) return u ? 'quatre-vingt-' + UNITS[u] : 'quatre-vingts';
+  const tw = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante'][t];
+  return u === 0 ? tw : u === 1 ? tw + ' et un' : tw + '-' + UNITS[u];
+}
+function below1000(n) {
+  const h = Math.floor(n / 100), r = n % 100;
+  const hs = h === 0 ? '' : h === 1 ? 'cent' : UNITS[h] + ' cent' + (r === 0 ? 's' : '');
+  return [hs, r || !hs ? below100(r) : ''].filter(Boolean).join(' ');
+}
+function frNumber(n) {
+  if (n < 1000) return below1000(n);
+  const th = Math.floor(n / 1000), r = n % 1000;
+  return (th === 1 ? 'mille' : below1000(th) + ' mille') + (r ? ' ' + below1000(r) : '');
+}
+function spellNumbers(text) { return text.replace(/\d+/g, (m) => (m.length <= 6 ? ' ' + frNumber(Number(m)) + ' ' : m)); }
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  }
+  return d[a.length][b.length];
+}
+// 1 : même mot ou même son ; 2 : mot approché (une lettre d'écart) ; 0 : différent.
+function same(a, b) {
+  if (!a || !b) return 0;
+  if (a.n === b.n || (a.s && a.s === b.s)) return 1;
+  return a.n.length >= 4 && b.n.length >= 4 && lev(a.n, b.n) <= 1 ? 2 : 0;
+}
+// Suivi : tolère un mot en trop ou en moins ; si deux mots entendus de suite se retrouvent plus loin (≤ 15 mots), on y saute.
+function track(exp, heard) {
+  let i = 0, j = 0;
+  const skipped = [], approx = new Map();
+  while (i < exp.length && j < heard.length) {
+    const q = same(exp[i], heard[j]);
+    if (q) { if (q === 2) approx.set(i, heard[j].raw); i++; j++; continue; }
+    if (j + 1 < heard.length && same(exp[i], heard[j + 1])) { j += 2; i++; continue; }
+    if (i + 1 < exp.length && same(exp[i + 1], heard[j]) && exp[i + 1].n.length >= 3) { skipped.push(i); i += 2; j++; continue; }
+    let jump = 0;
+    if (j + 1 < heard.length && (heard[j].n.length >= 4 || heard[j + 1].n.length >= 4)) {
+      for (let d = 2; d <= 15 && i + d + 1 < exp.length; d++) {
+        if (same(exp[i + d], heard[j]) && same(exp[i + d + 1], heard[j + 1])) { jump = d; break; }
+      }
+    }
+    if (jump) { for (let k = i; k < i + jump; k++) skipped.push(k); i += jump; continue; }
+    j++;
+  }
+  return { pos: i, skipped, approx };
+}
+
+// ---------- Lecture du texte : personnages et répliques ----------
+const UP = 'A-ZÀ-ÖØ-ÞŒ';
+const NAME = `[${UP}][${UP}'’\\- ]{0,30}[${UP}]`;
+const RE_INLINE = new RegExp(`^(${NAME})\\s*(?:,\\s*([^.:—–]{1,60}?))?\\s*(?:[.:]\\s*[—–-]?|[—–])\\s*(\\S.*)$`);
+const RE_ALONE = new RegExp(`^(${NAME})\\s*(?:,\\s*([^.:—–]{1,60}?))?\\s*[.:]?$`);
+const RE_MIXED = /^([A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ'’\-]+(?: [A-ZÀ-ÖØ-Þa-zà-öø-ÿ'’\-]+){0,2})\s*:\s*(\S.*)$/;
+const RE_HEAD = /^(ACTE|SC[ÈE]NE|TABLEAU|PROLOGUE|[ÉE]PILOGUE|FIN|RIDEAU|PERSONNAGES)\b/i;
+const RE_ROMAN = /^[IVXLC]+$/;
+const STOP = new Set(['NON', 'OUI', 'AH', 'OH', 'EH', 'HÉ', 'HEIN', 'MAIS', 'ET', 'OK', 'ALLEZ', 'BON', 'HÉLAS', 'NOTE', 'FIN', 'MOI', 'TOI', 'QUOI', 'COMMENT', 'SILENCE', 'NOIR']);
+function cleanName(n) { return n.replace(/'/g, '’').replace(/\s+/g, ' ').trim().toUpperCase(); }
+function matchLine(line) {
+  let m = line.match(RE_INLINE);
+  if (m) return { name: cleanName(m[1]), didas: m[2] || '', rest: m[3], kind: 'inline' };
+  m = line.match(RE_ALONE);
+  if (m) return { name: cleanName(m[1]), didas: m[2] || '', rest: '', kind: 'alone' };
+  m = line.match(RE_MIXED);
+  if (m) return { name: cleanName(m[1]), didas: '', rest: m[2], kind: 'mixed' };
+  return null;
+}
+function splitDidas(text) {
+  const did = [];
+  const say = text.replace(/\(([^)]*)\)|\[([^\]]*)\]/g, (_, a, b) => { did.push((a || b || '').trim()); return ' '; });
+  return { say: say.replace(/\*/g, '').replace(/\s\/\s/g, ' ').replace(/\s+/g, ' ').trim(), did };
+}
+function parseScript(raw) {
+  const lines = raw.replace(/\r\n?/g, '\n').replace(/ /g, ' ').split('\n');
+  let title = '', me = '';
+  const counts = new Map(), inlineOnce = new Set();
+  const body = [];
+  for (const l0 of lines) {
+    const l = l0.trim();
+    if (/^#\s+/.test(l)) { if (!title) title = l.replace(/^#\s+/, ''); continue; }
+    if (/^@moi\s+/i.test(l)) { me = cleanName(l.replace(/^@moi\s+/i, '')); continue; }
+    if (/^>/.test(l)) continue;
+    body.push(l);
+    if (!l || RE_HEAD.test(l)) continue;
+    const m = matchLine(l);
+    if (!m || STOP.has(m.name) || RE_ROMAN.test(m.name.replace(/[ .]/g, '')) || RE_HEAD.test(m.name)) continue;
+    counts.set(m.name, (counts.get(m.name) || 0) + 1);
+    if (m.kind === 'inline') inlineOnce.add(m.name);
+  }
+  const strong = [...counts].filter(([, c]) => c >= 2).map(([n]) => n);
+  const names = new Set(strong);
+  if (strong.length >= 2) for (const n of inlineOnce) names.add(n);
+  const items = [];
+  if (names.size >= 2) {
+    let cur = null;
+    const push = () => { if (cur) { const d = splitDidas(cur.text); if (d.say) items.push({ who: cur.who, text: d.say, didas: [cur.didas, ...d.did].filter(Boolean).join(' — ') }); } cur = null; };
+    for (const l of body) {
+      if (!l) continue;
+      if (RE_HEAD.test(l)) { push(); continue; }
+      const m = matchLine(l);
+      if (m && names.has(m.name)) { push(); cur = { who: m.name, text: m.rest, didas: m.didas }; continue; }
+      if (cur) cur.text += ' ' + l;
+    }
+    push();
+    return { title, me: names.has(me) ? me : '', poem: false, items, speakers: [...names].map((n) => ({ name: n, count: items.filter((it) => it.who === n).length })).filter((s) => s.count) };
+  }
+  // Pas de personnages : une poésie ou un texte seul, paragraphe par paragraphe (4 lignes au plus par morceau).
+  const paras = [];
+  let para = [];
+  for (const l of body) { if (!l) { if (para.length) paras.push(para); para = []; } else para.push(l); }
+  if (para.length) paras.push(para);
+  // Une première ligne seule, courte et sans ponctuation finale, est le titre.
+  if (!title && paras.length > 1 && paras[0].length === 1 && paras[0][0].split(/\s+/).length <= 8 && !/[.,;:!?…]$/.test(paras[0][0])) title = paras.shift()[0];
+  for (const pa of paras) {
+    for (let k = 0; k < pa.length; k += 4) {
+      const d = splitDidas(pa.slice(k, k + 4).join(' '));
+      if (d.say) items.push({ who: '', text: d.say, didas: d.did.join(' — ') });
+    }
+  }
+  return { title, me: '', poem: true, items, speakers: [] };
+}
+// Les échanges de la séance : pour chaque réplique à moi, le signal qui la précède.
+function exchanges(parsed, me) {
+  const out = [];
+  let cue = [];
+  for (const it of parsed.items) {
+    if (parsed.poem || it.who === me) { out.push({ cue, line: it.text, didas: it.didas, who: it.who }); cue = []; }
+    else cue.push(it);
+  }
+  return out;
+}
+
+// ---------- Fichiers : PDF, Word, texte ----------
+async function readTextFile(file) {
+  const buf = await file.arrayBuffer();
+  let t = new TextDecoder('utf-8').decode(buf);
+  if (t.includes('�')) t = new TextDecoder('windows-1252').decode(buf);
+  return t;
+}
+async function inflate(data) {
+  const ds = new DecompressionStream('deflate-raw');
+  const stream = new Blob([data]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function unzipEntry(buf, wanted) {
+  const v = new DataView(buf);
+  let e = buf.byteLength - 22;
+  while (e >= 0 && v.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('zip');
+  const n = v.getUint16(e + 10, true);
+  let p = v.getUint32(e + 16, true);
+  for (let k = 0; k < n; k++) {
+    const method = v.getUint16(p + 10, true), size = v.getUint32(p + 20, true);
+    const nl = v.getUint16(p + 28, true), xl = v.getUint16(p + 30, true), cl = v.getUint16(p + 32, true), off = v.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(new Uint8Array(buf, p + 46, nl));
+    if (name === wanted) {
+      const lnl = v.getUint16(off + 26, true), lxl = v.getUint16(off + 28, true);
+      const data = new Uint8Array(buf, off + 30 + lnl + lxl, size);
+      return method === 0 ? data : inflate(data);
+    }
+    p += 46 + nl + xl + cl;
+  }
+  throw new Error('document.xml');
+}
+async function readDocx(file) {
+  const xml = new TextDecoder().decode(await unzipEntry(await file.arrayBuffer(), 'word/document.xml'));
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const lines = [];
+  for (const p of doc.getElementsByTagNameNS(W, 'p')) {
+    let s = '';
+    for (const n of p.getElementsByTagNameNS(W, '*')) {
+      if (n.localName === 't') s += n.textContent;
+      else if (n.localName === 'tab') s += ' ';
+      else if (n.localName === 'br') s += '\n';
+    }
+    lines.push(s);
+  }
+  return lines.join('\n');
+}
+async function readPdf(file) {
+  const pdfjs = await import('./lib/pdf.min.js');
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('./lib/pdf.worker.min.js', location.href).href;
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise;
+  const out = [];
+  for (let k = 1; k <= pdf.numPages; k++) {
+    const page = await pdf.getPage(k);
+    const tc = await page.getTextContent();
+    const rows = [];
+    for (const it of tc.items) {
+      if (!('str' in it) || !it.str.trim()) continue;
+      const x = it.transform[4], y = it.transform[5], h = Math.abs(it.transform[3]) || it.height || 10;
+      let row = rows.find((r) => Math.abs(r.y - y) < h * 0.5);
+      if (!row) { row = { y, h, parts: [] }; rows.push(row); }
+      row.parts.push({ x, s: it.str, w: it.width || 0 });
+    }
+    rows.sort((a, b) => b.y - a.y);
+    let prev = null;
+    for (const r of rows) {
+      r.parts.sort((a, b) => a.x - b.x);
+      let s = '', end = null;
+      for (const p of r.parts) { if (end !== null && p.x - end > 1.5) s += ' '; s += p.s; end = p.x + p.w; }
+      s = s.replace(/\s+/g, ' ').trim();
+      if (/^\d{1,4}$/.test(s)) continue; // numéro de page
+      if (prev && prev.y - r.y > Math.max(prev.h, r.h) * 1.9) out.push('');
+      out.push(s);
+      prev = r;
+    }
+    out.push('');
+  }
+  return out.join('\n');
+}
+
+// ---------- Mémoire (sur l'iPhone seulement) ----------
+const KEY = 'repetition-v1';
+let db = { texts: [] };
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s && Array.isArray(s.texts)) db = s;
+} catch (e) { /* mémoire indisponible */ }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); return true; } catch (e) { return false; } }
+
+// ---------- Affichage ----------
+const $ = (id) => document.getElementById(id);
+const now = () => performance.now();
+function show(id) { for (const s of ['library', 'editor', 'session']) $(s).hidden = s !== id; window.scrollTo(0, 0); }
+function el(tag, cls, txt) { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; }
+function plural(n, one, many) { return `${n} ${n > 1 ? many : one}`; }
+
+function renderList() {
+  const list = $('list');
+  list.replaceChildren();
+  if (!db.texts.length) { list.append(el('p', 'muted', 'Aucun texte pour l’instant.')); return; }
+  for (const t of db.texts) {
+    const b = el('button', 'text-card');
+    const box = el('span');
+    box.append(el('span', 't', t.title || 'Sans titre'));
+    const last = t.history.length ? t.history[t.history.length - 1] : null;
+    const ex = exchanges(parseScript(t.text), t.me);
+    const who = t.me ? `rôle : ${t.me}` : 'texte seul';
+    box.append(el('span', 'a', `${who} · ${plural(ex.length, 'réplique', 'répliques')}` + (last ? ` · dernière séance : ${new Date(last.date).toLocaleDateString('fr-FR')}` : '')));
+    b.append(box);
+    b.addEventListener('click', () => openText(t.id));
+    list.append(b);
+  }
+}
+
+// ---------- Ajout ----------
+let parsedDraft = null;
+$('add').addEventListener('click', () => {
+  $('ed-title').value = ''; $('ed-text').value = ''; $('file-status').textContent = ''; $('ed-result').hidden = true; $('file').value = '';
+  show('editor');
+});
+$('ed-back').addEventListener('click', () => { renderList(); show('library'); });
+$('file').addEventListener('change', async () => {
+  const f = $('file').files[0];
+  if (!f) return;
+  const name = f.name.toLowerCase();
+  $('file-status').textContent = 'Lecture…';
+  try {
+    let t;
+    if (name.endsWith('.pdf') || f.type === 'application/pdf') t = await readPdf(f);
+    else if (name.endsWith('.docx')) t = await readDocx(f);
+    else if (name.endsWith('.doc')) throw new Error('doc');
+    else t = await readTextFile(f);
+    $('ed-text').value = t.replace(/\n{3,}/g, '\n\n').trim();
+    if (!$('ed-title').value) $('ed-title').value = f.name.replace(/\.[^.]+$/, '');
+    $('file-status').textContent = 'Texte lu : vérifie-le, puis repère les personnages.';
+    parseDraft();
+  } catch (e) {
+    $('file-status').textContent = e.message === 'doc'
+      ? 'Ancien format Word (.doc) : enregistre-le en .docx, ou copie-colle le texte.'
+      : 'Je n’arrive pas à lire ce fichier. Copie-colle le texte à la place.';
+  }
+});
+function parseDraft() {
+  const txt = $('ed-text').value;
+  parsedDraft = parseScript(txt);
+  if (parsedDraft.title && !$('ed-title').value) $('ed-title').value = parsedDraft.title;
+  const cast = $('ed-cast');
+  cast.replaceChildren();
+  $('ed-result').hidden = false;
+  if (!parsedDraft.items.length) { $('ed-summary').textContent = 'Aucun texte à réviser.'; $('ed-save').disabled = true; return; }
+  if (parsedDraft.poem) {
+    $('ed-summary').textContent = `Pas de personnages repérés : tout le texte est à toi, en ${plural(parsedDraft.items.length, 'morceau', 'morceaux')} (paragraphes).`;
+    $('ed-save').disabled = false;
+    return;
+  }
+  $('ed-summary').textContent = `${plural(parsedDraft.speakers.length, 'personnage repéré', 'personnages repérés')}. Lequel est ton rôle ?`;
+  for (const s of parsedDraft.speakers) {
+    const lab = el('label');
+    const r = el('input'); r.type = 'radio'; r.name = 'me'; r.value = s.name; r.checked = s.name === parsedDraft.me;
+    r.addEventListener('change', () => { $('ed-save').disabled = false; });
+    lab.append(r, el('span', '', `${s.name} `), el('span', 'small', `(${plural(s.count, 'réplique', 'répliques')})`));
+    cast.append(lab);
+  }
+  $('ed-save').disabled = !parsedDraft.me;
+}
+$('ed-parse').addEventListener('click', parseDraft);
+$('ed-text').addEventListener('input', () => { $('ed-result').hidden = true; $('ed-save').disabled = true; });
+$('ed-save').addEventListener('click', () => {
+  const me = parsedDraft.poem ? '' : (document.querySelector('#ed-cast input:checked') || {}).value;
+  if (!parsedDraft.poem && !me) return;
+  const check = parseScript($('ed-text').value);
+  if (check.poem !== parsedDraft.poem || (me && !check.speakers.some((x) => x.name === me))) { parseDraft(); return; }
+  const t = { id: 't' + Date.now().toString(36), title: $('ed-title').value.trim() || parsedDraft.title || 'Sans titre', text: $('ed-text').value, me, last: 0, history: [] };
+  db.texts.unshift(t);
+  if (!save()) { $('ed-summary').textContent = 'La mémoire de l’iPhone refuse d’enregistrer (navigation privée ?).'; db.texts.shift(); return; }
+  openText(t.id);
+});
+$('example').addEventListener('click', () => {
+  let t = db.texts.find((x) => x.example);
+  if (!t) { t = { id: 'exemple', example: true, title: EXAMPLE.title, text: EXAMPLE.text, me: EXAMPLE.me, last: 0, history: [] }; db.texts.push(t); save(); }
+  openText(t.id);
+});
+
+// ---------- Séance ----------
+let text = null, ex = [], mode = 'coeur', session = null;
+function setMode(m) { mode = m; $('mode-voir').setAttribute('aria-pressed', m === 'voir'); $('mode-coeur').setAttribute('aria-pressed', m === 'coeur'); }
+$('mode-voir').addEventListener('click', () => setMode('voir'));
+$('mode-coeur').addEventListener('click', () => setMode('coeur'));
+function cueLabel(e, k) {
+  if (!e.cue.length) return `${k + 1}. ${k === 0 ? 'Début' : 'Morceau ' + (k + 1)}`;
+  const last = e.cue[e.cue.length - 1].text.split(/\s+/);
+  return `${k + 1}. après «\u00a0…${last.slice(-4).join(' ')}\u00a0»`;
+}
+function openText(id) {
+  text = db.texts.find((t) => t.id === id);
+  if (!text) return;
+  ex = exchanges(parseScript(text.text), text.me);
+  $('se-title').textContent = text.title;
+  $('se-progress').textContent = '';
+  const sel = $('se-from');
+  sel.replaceChildren();
+  ex.forEach((e, k) => { const o = el('option', '', cueLabel(e, k)); o.value = String(k); sel.append(o); });
+  sel.value = String(Math.min(text.last || 0, Math.max(0, ex.length - 1)));
+  $('se-setup').hidden = false; $('se-run').hidden = true; $('se-end').hidden = true;
+  $('go').disabled = !ex.length;
+  show('session');
+}
+$('se-back').addEventListener('click', () => { if (session) endSession(false); renderList(); show('library'); });
+$('se-delete').addEventListener('click', () => {
+  if (!text || !confirm('Effacer ce texte de l’iPhone ?')) return;
+  db.texts = db.texts.filter((t) => t !== text);
+  save();
+  renderList(); show('library');
+});
+
+const API = window.SpeechRecognition || window.webkitSpeechRecognition;
+const HAS_SESSION = 'audioSession' in navigator;
+function setAudio(type) { if (!HAS_SESSION) return '—'; try { navigator.audioSession.type = type; return navigator.audioSession.type; } catch (e) { return 'refusé'; } }
+const STANDALONE = (window.navigator.standalone === true) || matchMedia('(display-mode: standalone)').matches;
+
+$('go').addEventListener('click', () => startSession(Number($('se-from').value) || 0));
+function startSession(from) {
+  if (!API) { alert('Ce navigateur ne sait pas écouter : ouvre la page dans Safari.'); return; }
+  const st = {
+    t0: now(), date: new Date(), from, k: from, active: true, rec: null, recs: 0, ends: 0, relaunch: [], errors: [], pauses: [],
+    base: '', finals: '', interim: '', anchor: 0, openAt: 0, firstOpen: null, lastAt: 0, readyAt: 0, hintLevel: 0, timer: null, doneAt: 0,
+    lines: [], audio: setAudio('play-and-record'), wake: null, beeps: '', dups: 0, resets: 0,
+  };
+  session = st;
+  $('se-setup').hidden = true; $('se-end').hidden = true; $('se-run').hidden = false; $('resume').hidden = true;
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then((w) => { st.wake = w; }).catch(() => {}); } catch (e) { /* rien */ }
+  startRec(st);
+  beginLine(st);
+  tick(st);
+}
+function heardWords(st) { return tokens(spellNumbers(st.base + ' ' + st.finals + ' ' + st.interim)).map(word); }
+function beginLine(st) {
+  const e = ex[st.k];
+  st.anchor = heardWords(st).length;
+  st.hintLevel = 0; st.doneAt = 0;
+  const words = displayWords(e.line);
+  const exp = tokens(e.line).map(word);
+  const read = Math.min(T.readMax, Math.max(T.readMin, T.readBase + T.readWord * e.cue.reduce((a, c) => a + tokens(c.text).length, 0)));
+  st.cur = { words, exp, pos: 0, skipped: new Set(), hinted: new Set(), approx: new Map(), shownAt: now(), read: e.cue.length ? read : Math.min(600, T.readMin), firstWordAt: 0, hints: 0 };
+  st.readyAt = st.cur.shownAt + st.cur.read;
+  $('se-progress').textContent = `${st.k + 1} / ${ex.length}`;
+  const cue = $('cue');
+  cue.replaceChildren();
+  const shown = e.cue.slice(-3);
+  if (shown.length) {
+    const box = el('div', 'cue');
+    shown.forEach((c, idx) => {
+      const older = idx < shown.length - 1;
+      box.append(el('div', 'who', c.who + (c.didas ? ` (${c.didas})` : '')), el('div', 'say' + (older ? ' older' : ''), c.text));
+    });
+    cue.append(box);
+  }
+  $('didas').textContent = e.didas ? `(${e.didas})` : '';
+  $('me-who').textContent = e.who || '';
+  $('bubble').textContent = '';
+  $('status').textContent = shown.length ? 'Lis le signal…' : 'À toi.';
+  paintLine(st);
+}
+function paintLine(st) {
+  const c = st.cur, box = $('line');
+  box.replaceChildren();
+  c.words.forEach((w, i) => {
+    const s = el('span', 'w', w);
+    const said = i < c.pos;
+    if (c.skipped.has(i)) s.classList.add('skip');
+    else if (said && c.approx.has(i)) s.classList.add('approx');
+    else if (said && c.hinted.has(i)) s.classList.add('hint');
+    else if (said) s.classList.add('done');
+    else if (mode === 'coeur' && !(c.hinted.has(i) && st.hintLevel > 2)) s.classList.add('mask');
+    else s.classList.add('todo');
+    if (i === c.pos) s.classList.add('next');
+    box.append(s, document.createTextNode(/[’'\-]$/.test(w) ? '' : ' '));
+  });
+}
+function startRec(st) {
+  const rec = new API();
+  st.rec = rec; st.recs++;
+  rec.lang = 'fr-FR';
+  rec.continuous = true;
+  rec.interimResults = true;
+  const asked = now();
+  rec.onstart = () => { if (st.rec === rec && !st.openAt) rec.onaudiostart(); };
+  rec.onaudiostart = () => {
+    if (st.rec !== rec) return;
+    st.openAt = now();
+    if (st.firstOpen === null) st.firstOpen = (st.openAt - asked) / 1000;
+    if (st.readyAt < st.openAt) st.readyAt = st.openAt;
+  };
+  rec.onresult = (e) => {
+    if (st.rec !== rec) return;
+    // Safari peut redonner dans un résultat tout le texte déjà entendu (doublon) : on garde alors la version complète.
+    const segs = [];
+    let mid = '', dup = false;
+    for (let r = 0; r < e.results.length; r++) {
+      const t = e.results[r][0].transcript, k = key(t);
+      if (!e.results[r].isFinal) { mid += ' ' + t; continue; }
+      if (!k) continue;
+      const allK = segs.map((x) => x.k).join(' '), last = segs[segs.length - 1];
+      if (allK && k.startsWith(allK)) { segs.length = 0; dup = true; } // tout le texte redonné
+      else if (last && k.startsWith(last.k)) { segs.pop(); dup = true; } // le résultat précédent redonné et prolongé
+      segs.push({ t, k });
+    }
+    let fin = segs.map((x) => x.t).join(' ');
+    const finK = segs.map((x) => x.k).join(' ');
+    if (finK && key(mid).startsWith(finK)) { fin = ''; dup = true; }
+    if (dup && !st.dupSeen) { st.dups++; st.dupSeen = true; } else if (!dup) st.dupSeen = false;
+    // Liste de résultats repartie de zéro sans fin d'écoute : on garde ce qui était entendu.
+    const prevK = key(st.finals);
+    if (prevK && !(key(fin + ' ' + mid)).startsWith(prevK)) { st.base += ' ' + st.finals + ' ' + st.interim; st.resets++; }
+    st.finals = fin; st.interim = mid;
+    update(st);
+  };
+  rec.onerror = (e) => { st.error = e.error; if (st.errors.length < 30) st.errors.push(`${((now() - st.t0) / 1000).toFixed(1)} s ${e.error}`); };
+  rec.onend = () => {
+    if (st.rec !== rec || !st.active) return;
+    st.ends++;
+    if (st.error === 'not-allowed' || st.error === 'service-not-allowed') { pause(st, 'L’iPhone n’a pas le droit d’écouter. Vérifie l’accès au micro dans les réglages de Safari.', 'refus'); return; }
+    if (st.ends > 30) { pause(st, 'L’écoute s’arrête sans cesse. Touche « Je continue ».', 'coupures'); return; }
+    // L'iPhone a coupé l'écoute : on relance aussitôt, en gardant ce qui était entendu.
+    st.relaunch.push(((now() - st.t0) / 1000).toFixed(1));
+    st.base += ' ' + st.finals + ' ' + st.interim;
+    st.finals = st.interim = '';
+    st.error = null;
+    try { startRec(st); } catch (err) { pause(st, 'J’ai arrêté d’écouter. Touche « Je continue ».', 'relance impossible'); }
+  };
+  try { rec.start(); } catch (err) { pause(st, 'Je n’arrive pas à écouter. Touche « Je continue ».', 'démarrage impossible'); }
+}
+function update(st) {
+  if (!st.active || !st.cur) return;
+  const heard = heardWords(st).slice(st.anchor);
+  const c = st.cur;
+  const r = track(c.exp, heard);
+  const t = now();
+  if (heard.length) st.lastAt = t;
+  if (heard.length && !c.firstWordAt) c.firstWordAt = t;
+  if (r.pos > c.pos) {
+    c.pos = r.pos;
+    st.hintLevel = 0;
+    $('bubble').textContent = '';
+    $('status').textContent = '';
+  }
+  c.skipped = new Set([...c.skipped, ...r.skipped.filter((i) => i < c.pos)]);
+  for (const [i, w] of r.approx) if (i < c.pos) c.approx.set(i, w);
+  paintLine(st);
+  if (c.pos >= c.exp.length && !st.doneAt) { st.doneAt = t; $('status').textContent = '✓'; }
+}
+function nextLine(st) {
+  const c = st.cur;
+  st.lines.push({ n: c.exp.length, said: c.pos, hints: c.hinted.size, skipped: c.skipped.size, approx: c.approx.size,
+    first: c.firstWordAt ? ((c.firstWordAt - st.readyAt) / 1000).toFixed(1) : '—', dur: ((now() - c.shownAt) / 1000).toFixed(1), touch: !!c.skippedByTouch,
+    detail: { k: st.k, words: c.words, hinted: [...c.hinted], skipped: [...c.skipped], approx: [...c.approx] } });
+  st.k++;
+  if (st.k >= ex.length) { endSession(true); return; }
+  beginLine(st);
+}
+function tick(st) {
+  if (!st.active) return;
+  const t = now(), c = st.cur;
+  if (st.doneAt) {
+    if (t - st.doneAt > T.end) nextLine(st);
+  } else if (st.openAt && t > st.readyAt) {
+    if ($('status').textContent === 'Lis le signal…') $('status').textContent = 'À toi.';
+    const idle = t - Math.max(st.lastAt, st.readyAt);
+    const wait = T.stall + st.hintLevel * T.step;
+    if (c.pos < c.exp.length && st.hintLevel < 3 && idle > wait) {
+      st.hintLevel++;
+      let target = c.words[c.pos], ids = [c.pos];
+      if (/[’'\-]\s*$/.test(target) && c.pos + 1 < c.words.length) { target += c.words[c.pos + 1]; ids.push(c.pos + 1); }
+      target = target.replace(/[\s.,:;!?«»…—–()]/g, '');
+      let shown;
+      if (st.hintLevel === 1) shown = target.slice(0, /^[a-zà-ÿ]{1,3}[’']/i.test(target) ? target.search(/[’']/) + 2 : 1);
+      else if (st.hintLevel === 2) shown = target.slice(0, Math.max(2, Math.ceil(target.length / 2)));
+      else shown = target;
+      $('bubble').textContent = shown.length >= target.length ? `«\u00a0${target}\u00a0»` : `«\u00a0${shown}…\u00a0»`;
+      for (const i of ids) c.hinted.add(i);
+      paintLine(st);
+    }
+  }
+  if (!st.doneAt && st.openAt && t - Math.max(st.lastAt, st.readyAt) > T.deaf + st.hintLevel * T.step) {
+    pause(st, 'Je n’entends plus rien. Quand tu es prêt, touche « Je continue ».', 'silence');
+    return;
+  }
+  st.timer = setTimeout(() => tick(st), 200);
+}
+function stopRec(st) { const rec = st.rec; st.rec = null; try { if (rec) rec.stop(); } catch (e) { /* déjà arrêtée */ } }
+// Pause : l'écoute s'arrête, la place est gardée ; « Je continue » relance au toucher.
+function pause(st, msg, why) {
+  st.active = false;
+  clearTimeout(st.timer);
+  stopRec(st);
+  st.base += ' ' + st.finals + ' ' + st.interim; st.finals = st.interim = '';
+  st.pauses.push(`${((now() - st.t0) / 1000).toFixed(1)} s ${why}`);
+  $('status').textContent = msg;
+  $('resume').hidden = false;
+}
+$('resume').addEventListener('click', () => {
+  const st = session;
+  if (!st) return;
+  st.active = true; st.error = null; st.ends = 0; st.openAt = 0; st.lastAt = 0; st.hintLevel = 0;
+  st.readyAt = now();
+  $('resume').hidden = true; $('status').textContent = '';
+  startRec(st);
+  tick(st);
+});
+$('skip').addEventListener('click', () => { const st = session; if (!st) return; st.cur.skippedByTouch = true; nextLine(st); if (session === st && !st.active) { st.active = true; $('resume').hidden = true; startRec(st); tick(st); } });
+$('stop').addEventListener('click', () => { if (session) endSession(false); });
+
+function endSession(finished) {
+  const st = session;
+  if (!st) return;
+  session = null;
+  st.active = false;
+  clearTimeout(st.timer);
+  stopRec(st);
+  setAudio('auto');
+  try { if (st.wake) st.wake.release(); } catch (e) { /* rien */ }
+  st.finished = finished;
+  st.dur = Math.round((now() - st.t0) / 1000);
+  const done = st.lines.length;
+  const sum = st.lines.reduce((a, l) => ({ n: a.n + l.n, h: a.h + l.hints, s: a.s + l.skipped, x: a.x + l.approx }), { n: 0, h: 0, s: 0, x: 0 });
+  text.last = st.k >= ex.length ? 0 : st.k;
+  text.history.push({ date: st.date.toISOString(), mode, from: st.from, done, words: sum.n, hints: sum.h, skipped: sum.s, approx: sum.x, dur: st.dur });
+  if (text.history.length > 200) text.history.splice(0, text.history.length - 200);
+  save();
+  st.sum = sum;
+  lastSession = st;
+  $('se-run').hidden = true; $('se-end').hidden = false; $('report').hidden = true; $('copied').textContent = '';
+  $('end-title').textContent = finished ? (sum.h + sum.s === 0 ? 'Scène sans aucune aide !' : 'Scène terminée') : 'Séance arrêtée';
+  $('end-sum').textContent = `${plural(done, 'réplique', 'répliques')} sur ${ex.length - st.from} · ${plural(sum.h, 'mot soufflé', 'mots soufflés')} · ${plural(sum.s, 'mot sauté', 'mots sautés')} · ${plural(sum.x, 'mot approché', 'mots approchés')} · ${st.dur} s`;
+  const ul = $('end-issues');
+  ul.replaceChildren();
+  for (const l of st.lines) {
+    const d = l.detail;
+    if (!d.hinted.length && !d.skipped.length && !d.approx.length) continue;
+    const bits = [];
+    const clean = (w) => w.replace(/[\s.,:;!?«»…—–()]/g, '');
+    if (d.hinted.length) bits.push('soufflé : ' + d.hinted.map((i) => clean(d.words[i])).join(', '));
+    if (d.skipped.length) bits.push('sauté : ' + d.skipped.map((i) => clean(d.words[i])).join(', '));
+    if (d.approx.length) bits.push('approché : ' + d.approx.map(([i, w]) => `«\u00a0${w}\u00a0» pour «\u00a0${clean(d.words[i])}\u00a0»`).join(', '));
+    const li = el('li', '', `Réplique ${d.k + 1} — ${bits.join(' ; ')} `);
+    const again = el('button', 'link', 'Reprendre ici');
+    again.style.marginLeft = '6px';
+    again.addEventListener('click', () => { $('se-from').value = String(d.k); $('se-end').hidden = true; $('se-setup').hidden = false; });
+    li.append(again);
+    ul.append(li);
+  }
+  if (!ul.children.length && done) ul.append(el('li', '', 'Rien à reprendre.'));
+  const act = $('end-actions');
+  act.replaceChildren();
+  const again = el('button', 'primary', text.last ? `Continuer à la réplique ${text.last + 1}` : 'Recommencer au début');
+  again.addEventListener('click', () => { $('se-from').value = String(text.last); $('se-end').hidden = true; $('se-setup').hidden = false; });
+  act.append(again);
+  const bx = $('beeps');
+  bx.replaceChildren();
+  for (const b of ['aucun', 'un au début', 'un au début et un à la fin', 'plus']) {
+    const btn = el('button', '', b);
+    btn.setAttribute('aria-pressed', 'false');
+    btn.addEventListener('click', () => { st.beeps = b; for (const x of bx.children) x.setAttribute('aria-pressed', x === btn); });
+    bx.append(btn);
+  }
+}
+let lastSession = null;
+// Rapport technique : nombres et temps seulement (jamais le texte, le titre ni les personnages).
+function report(st) {
+  const L = [];
+  L.push('RÉPÉTITION 0.1.0 — rapport technique (sans le texte)');
+  L.push('Date : ' + st.date.toLocaleString('fr-FR'));
+  L.push('Navigateur : ' + navigator.userAgent);
+  L.push('Ouverte depuis l’écran d’accueil : ' + (STANDALONE ? 'oui' : 'non'));
+  L.push('Reconnaissance : ' + (window.SpeechRecognition ? 'SpeechRecognition' : window.webkitSpeechRecognition ? 'webkitSpeechRecognition' : 'absente'));
+  L.push('Réglage son au début : ' + st.audio + ' ; maintien de l’écran : ' + (st.wake ? 'oui' : 'non'));
+  L.push(`Séance : mode ${mode === 'coeur' ? 'par cœur' : 'texte visible'}, ${st.finished ? 'finie' : 'arrêtée'}, ${st.lines.length} répliques sur ${ex.length - st.from} (départ ${st.from + 1}), durée ${st.dur} s`);
+  L.push(`Mots : ${st.sum.n}, soufflés ${st.sum.h}, sautés ${st.sum.s}, approchés ${st.sum.x}`);
+  L.push(`Écoute : ouverte ${st.recs} fois (1 au début + ${st.relaunch.length} relance(s) automatique(s) + ${st.recs - 1 - st.relaunch.length} après « Je continue ») ; prête ${st.firstOpen === null ? '—' : st.firstOpen.toFixed(2) + ' s'} après la demande`);
+  L.push('Relances après une coupure par l’iPhone, à : ' + (st.relaunch.length ? st.relaunch.map((s) => s + ' s').join(', ') : 'aucune'));
+  L.push('Pauses : ' + (st.pauses.length ? st.pauses.join(', ') : 'aucune'));
+  L.push('Erreurs : ' + (st.errors.length ? st.errors.join(', ') : 'aucune'));
+  L.push('Bips entendus, selon toi : ' + (st.beeps || 'pas répondu'));
+  L.push(`Résultats de la reconnaissance : doublons repérés ${st.dups}, listes reparties de zéro ${st.resets}`);
+  L.push('Par réplique (mots, dits, soufflés, sautés, approchés, 1er mot après le signal, durée) :');
+  st.lines.forEach((l, i) => L.push(`  ${st.from + i + 1} : ${l.n} mots, ${l.said} dits, ${l.hints} soufflés, ${l.skipped} sautés, ${l.approx} approchés, 1er mot ${l.first} s, ${l.dur} s${l.touch ? ', passée au toucher' : ''}`));
+  return L.join('\n');
+}
+$('copy').addEventListener('click', async () => {
+  if (!lastSession) return;
+  const r = report(lastSession);
+  $('report').textContent = r; $('report').hidden = false;
+  try { await navigator.clipboard.writeText(r); $('copied').textContent = 'Copié.'; } catch (e) { $('copied').textContent = 'Sélectionne le texte ci-dessous pour le copier.'; }
+});
+
+renderList();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

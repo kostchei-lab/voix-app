@@ -42,12 +42,18 @@ Les notes de projet et les recherches sont ailleurs, dans un dépôt privé.
   respirations, intention, conseil) à côté de chaque réplique, et pour chaque prise le débit, les pauses, la mélodie
   (étendue, fin montante ou descendante) et le volume, avec réécoute et rappel de la prise précédente. Réutilise le micro
   et la mesure de hauteur de Voix (`js/`).
+- **`repetition/`, Répétition** (iPhone, 27 novembre 2026) : réviser un rôle. Texte importé d'un PDF, d'un Word (.docx),
+  d'un fichier texte ou collé ; personnages repérés (« NOM : texte », « NOM. — texte », nom seul sur une ligne ; sans
+  personnages, tout le texte est à soi, paragraphe par paragraphe). Séance : le signal s'affiche, une seule écoute pour
+  toute la séance (pas d'ouverture par réplique), mots allumés au fil de la voix, souffleur à l'écran après 3 s de blanc
+  (première lettre, moitié du mot, mot), mots sautés et approchés signalés sans bloquer, bilan et rapport technique sans
+  le texte. Le texte reste dans la mémoire de la page ; lecture des PDF par pdf.js 4.10.38 (licence Apache 2.0, `repetition/lib/`).
 - **`souffleur-test/`** : page de test de la reconnaissance vocale sur iPhone (v5.1 : appli fermée entre deux essais ;
   M sur huit échanges, page rechargée, lecteur ordinaire puis lecteur de la page, micro de la page seul sans la
   reconnaissance d'Apple, écouteurs, mode avion pour savoir si la reconnaissance se fait sur l'iPhone).
 
 Tests : `npm test` (dont les mesures de Souffleur), `node tests/e2e-poesies.cjs . <captures>`,
-`node tests/e2e-souffleur-test.cjs . <captures>` (page de test v5.1),
+`node tests/e2e-souffleur-test.cjs . <captures>` (page de test v5.1), `node tests/e2e-repetition.cjs . <captures>` (Répétition, scène inventée seulement),
 `python3 tests/make-test-replique.py <replique.wav>` puis `node tests/e2e-souffleur-jeu.cjs . <replique.wav> <captures>`.
 
 ## Technique
